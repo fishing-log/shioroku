@@ -1,0 +1,20 @@
+{
+  "name": "潮録 — フカセ釣り釣果記録",
+  "short_name": "潮録",
+  "description": "フカセ釣りの釣果・潮汐・タイドグラフを記録するアプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060f1c",
+  "theme_color": "#060f1c",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
