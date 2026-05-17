@@ -88,6 +88,37 @@ main {
   color: #a8daf5;
   letter-spacing: 1px;
 }
+.gps-loading {
+  font-size: 13px;
+  color: #5a8aa8;
+  animation: gps-pulse 1.2s ease-in-out infinite;
+}
+@keyframes gps-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.gps-error {
+  font-size: 13px;
+  color: #c0392b;
+}
+.btn-trip-photo {
+  display: block; width: 100%;
+  padding: 16px;
+  font-size: 16px; font-weight: 600; font-family: inherit;
+  background: #091828;
+  border: 1.5px dashed #2e8fd1;
+  border-radius: 12px;
+  color: #7ecef0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 4px;
+}
+.btn-trip-photo:active { background: #0d2035; }
+.trip-photo-preview {
+  width: 100%; border-radius: 12px;
+  display: block; margin-bottom: 8px;
+  object-fit: cover;
+}
 .date-label {
   font-size: 14px;
   color: #5a8aa8;
@@ -949,7 +980,7 @@ main { padding-bottom: 100px; }
 <main>
   <div class="card">
     <div class="location-row">
-      <span class="location-name">📍 館山（千葉県）</span>
+      <span class="location-name" id="locationName">📍 館山（千葉県）</span>
       <span class="date-label" id="dateLabel">—</span>
     </div>
     <div class="status-bar">
@@ -1222,7 +1253,15 @@ main { padding-bottom: 100px; }
     <div class="records-hdr">釣果一覧</div>
     <div class="records-list" id="endCatchList" style="margin-bottom:16px;"></div>
 
-    <div class="sec-lbl" style="margin-bottom:8px;">ブログ用サマリー</div>
+    <div class="sec-lbl" style="margin-bottom:8px;">全体集合写真（任意）</div>
+    <input type="file" accept="image/*" id="tripPhotoInput" style="display:none">
+    <div id="tripPhotoPreviewWrap" class="hidden">
+      <img id="tripPhotoPreview" class="trip-photo-preview" alt="集合写真">
+      <button class="btn-photo-delete" id="btnDeleteTripPhoto">✕ 写真を削除</button>
+    </div>
+    <button class="btn-trip-photo" id="btnTripPhoto">📷 集合写真を撮る / ライブラリから選ぶ</button>
+
+    <div class="sec-lbl" style="margin-bottom:8px;margin-top:16px;">ブログ用サマリー</div>
     <textarea class="summary-textarea" id="summaryText" readonly></textarea>
     <button class="btn-copy" id="btnCopySummary">📋 クリップボードにコピー</button>
 
@@ -1238,9 +1277,10 @@ main { padding-bottom: 100px; }
       <button class="btn-close-sheet" id="btnCloseSafety">✕</button>
     </div>
     <div class="sheet-body">
-      <p style="font-size:13px;color:#5a8aa8;margin-bottom:16px;line-height:1.6;">
+      <p style="font-size:13px;color:#5a8aa8;margin-bottom:8px;line-height:1.6;">
         釣行開始を家族や友人に知らせましょう。予定終了時刻を入力するとメッセージに含まれます。
       </p>
+      <div id="gpsStatus" style="margin-bottom:12px;min-height:18px;"></div>
       <div class="sec">
         <div class="sec-lbl">予定終了時刻（任意）</div>
         <input class="safety-time-input" type="time" id="safetyEndTime">
@@ -1811,6 +1851,7 @@ const session = {
   elapsedTimer: null,
   records: [],
   barraRecords: [],
+  tripPhoto: null,
   setup: {
     tackle:      '重タックル 3号',
     floatType:   '自作',
@@ -2425,7 +2466,8 @@ function buildSummary(totalMins, maxSize) {
   });
   const s = session.setup;
 
-  let txt = `【館山　${dateStr}】\n`;
+  const locName = gpsState.placeName || '館山（千葉県）';
+  let txt = `【${locName}　${dateStr}】\n`;
 
   // 潮汐
   if (tideData.extremes && tideData.extremes.length) {
@@ -2473,6 +2515,7 @@ function buildSummary(totalMins, maxSize) {
   txt += `\n釣果：${session.catches}尾 / バラシ：${session.barras}回`;
   if (maxSize) txt += ` / 最大：${maxSize}cm`;
   txt += `\n釣行時間：${formatDuration(totalMins)}\n`;
+  if (session.tripPhoto) txt += '📷 集合写真あり\n';
   txt += '\n#フカセ釣り #館山 #メジナ #潮録';
   return txt;
 }
@@ -2483,6 +2526,8 @@ document.getElementById('btnBackHome').addEventListener('click', () => {
   session.barraRecords = [];
   session.catches     = 0;
   session.barras      = 0;
+  session.tripPhoto   = null;
+  updateTripPhotoPreview(null);
   renderRecords();
   updateScore();
   applyState();
@@ -2509,7 +2554,16 @@ function buildSafetyMessage(endTime) {
   const hh  = String(now.getHours()).padStart(2,'0');
   const mm  = String(now.getMinutes()).padStart(2,'0');
   const end = endTime ? `予定終了：${endTime}` : '予定終了：未定';
-  return `【釣行開始のお知らせ】🎣\n\n場所：館山（千葉県）\n開始：${hh}:${mm}\n${end}\n\n無事に終わったら連絡します。\n安全に気をつけて楽しんできます！\n\n(潮録アプリより)`;
+
+  let locationLine;
+  if (gpsState.lat !== null) {
+    const mapsUrl = `https://maps.google.com/?q=${gpsState.lat.toFixed(6)},${gpsState.lng.toFixed(6)}`;
+    locationLine = `場所：${gpsState.placeName}\n緯度経度：${gpsState.lat.toFixed(5)}, ${gpsState.lng.toFixed(5)}\nマップ：${mapsUrl}`;
+  } else {
+    locationLine = '場所：館山（千葉県）\n※位置情報は未取得';
+  }
+
+  return `【釣行開始のお知らせ】🎣\n\n${locationLine}\n開始：${hh}:${mm}\n${end}\n\n無事に終わったら連絡します。\n安全に気をつけて楽しんできます！\n\n(潮録アプリより)`;
 }
 
 function updateSafetyPreview() {
@@ -2557,7 +2611,8 @@ function saveCurrentSession() {
     id:          session.startTime,
     startTime:   session.startTime,
     endTime:     Date.now(),
-    location:    '館山（千葉県）',
+    location:    gpsState.placeName || '館山（千葉県）',
+    gps:         (gpsState.lat !== null) ? { lat: gpsState.lat, lng: gpsState.lng } : null,
     setup: {
       ...session.setup,
       chum: [...session.setup.chum],
@@ -2566,6 +2621,7 @@ function saveCurrentSession() {
     barras:       session.barras,
     records:      session.records.slice(),
     barraRecords: session.barraRecords.slice(),
+    tripPhoto:    session.tripPhoto || null,
     extremes:     tideData.extremes || [],
     tideHeights:  tideData.rawHeights || [],
   };
@@ -2693,6 +2749,10 @@ function openHistoryDetail(trip) {
     </div>
     <div class="records-hdr">釣果一覧</div>
     <div class="records-list" style="margin-bottom:16px;">${recHtml}</div>
+    ${trip.tripPhoto ? `
+    <div class="sec-lbl" style="margin-bottom:8px;">集合写真</div>
+    <img src="${trip.tripPhoto}" class="trip-photo-preview" alt="集合写真">
+    ` : ''}
     <div class="sec-lbl" style="margin-bottom:8px;">ブログ用サマリー</div>
     <textarea class="summary-textarea" id="historySummaryText" readonly>${buildTripSummary(trip, totalMins, maxSize)}</textarea>
     <button class="btn-copy" id="btnCopyHistorySummary">📋 クリップボードにコピー</button>
@@ -2768,7 +2828,7 @@ function buildTripSummary(trip, totalMins, maxSize) {
   const s = trip.setup || {};
   const chumArr = Array.isArray(s.chum) ? s.chum : [];
 
-  let txt = `【館山　${dateStr}】\n`;
+  let txt = `【${trip.location || '館山（千葉県）'}　${dateStr}】\n`;
 
   if ((trip.extremes||[]).length) {
     txt += `潮汐：${trip.extremes
@@ -2814,6 +2874,7 @@ function buildTripSummary(trip, totalMins, maxSize) {
   txt += `\n釣果：${trip.catches}尾 / バラシ：${trip.barras}回`;
   if (maxSize) txt += ` / 最大：${maxSize}cm`;
   txt += `\n釣行時間：${formatDuration(totalMins)}\n`;
+  if (trip.tripPhoto) txt += '📷 集合写真あり\n';
   txt += '\n#フカセ釣り #館山 #メジナ #潮録';
   return txt;
 }
@@ -2872,6 +2933,119 @@ document.getElementById('cameraInput').addEventListener('change', async (e) => {
 document.getElementById('btnDeletePhoto').addEventListener('click', () => {
   catchRec.photo = null;
   updatePhotoPreview(null);
+});
+
+// ── 集合写真（終了画面） ──────────────────────────────
+function updateTripPhotoPreview(dataURL) {
+  const wrap = document.getElementById('tripPhotoPreviewWrap');
+  const img  = document.getElementById('tripPhotoPreview');
+  const btn  = document.getElementById('btnTripPhoto');
+  if (dataURL) {
+    img.src = dataURL;
+    wrap.classList.remove('hidden');
+    btn.textContent = '📷 撮り直す';
+  } else {
+    wrap.classList.add('hidden');
+    btn.textContent = '📷 集合写真を撮る / ライブラリから選ぶ';
+  }
+}
+
+document.getElementById('btnTripPhoto').addEventListener('click', () => {
+  document.getElementById('tripPhotoInput').click();
+});
+
+document.getElementById('tripPhotoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const dataURL = await compressImage(file);
+  session.tripPhoto = dataURL;
+  updateTripPhotoPreview(dataURL);
+  // localStorage を即時更新して集合写真を保存
+  saveCurrentSession();
+  // サマリーテキストを再生成
+  try {
+    const totalMins = session.startTime ? Math.floor((Date.now() - session.startTime) / 60000) : 0;
+    const maxSize   = session.records.filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+    document.getElementById('summaryText').value = buildSummary(totalMins, maxSize);
+  } catch(e) {}
+  e.target.value = '';
+});
+
+document.getElementById('btnDeleteTripPhoto').addEventListener('click', () => {
+  session.tripPhoto = null;
+  updateTripPhotoPreview(null);
+  saveCurrentSession();
+  try {
+    const totalMins = session.startTime ? Math.floor((Date.now() - session.startTime) / 60000) : 0;
+    const maxSize   = session.records.filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+    document.getElementById('summaryText').value = buildSummary(totalMins, maxSize);
+  } catch(e) {}
+});
+
+// ════════════════════════════════════════════════
+//  GPS 位置情報
+// ════════════════════════════════════════════════
+
+const gpsState = { lat: null, lng: null, placeName: null };
+
+function setGpsStatus(html) {
+  const el = document.getElementById('gpsStatus');
+  if (el) el.innerHTML = html;
+}
+
+function updateLocationName() {
+  const el = document.getElementById('locationName');
+  if (el && gpsState.placeName) el.textContent = `📍 ${gpsState.placeName}`;
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ja`;
+    const res  = await fetch(url, { headers: { 'Accept-Language': 'ja' } });
+    const json = await res.json();
+    const a    = json.address || {};
+    // 市区町村 → 都道府県 の順で表示名を組み立て
+    const city  = a.city || a.town || a.village || a.county || '';
+    const state = a.state || a.province || '';
+    return [city, state].filter(Boolean).join('・') || json.display_name.split(',')[0];
+  } catch {
+    return null;
+  }
+}
+
+async function fetchGPS() {
+  if (!navigator.geolocation) {
+    setGpsStatus('<span class="gps-error">⚠ この端末はGPSに対応していません</span>');
+    return;
+  }
+  setGpsStatus('<span class="gps-loading">📡 位置情報を取得中...</span>');
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      gpsState.lat = pos.coords.latitude;
+      gpsState.lng = pos.coords.longitude;
+      const name = await reverseGeocode(gpsState.lat, gpsState.lng);
+      gpsState.placeName = name || `${gpsState.lat.toFixed(4)}, ${gpsState.lng.toFixed(4)}`;
+      updateLocationName();
+      setGpsStatus(`<span style="font-size:13px;color:#3aae80;">✓ 位置取得完了：${gpsState.placeName}</span>`);
+      updateSafetyPreview();
+    },
+    (err) => {
+      const msgs = { 1: '位置情報の使用が許可されていません', 2: '位置情報を取得できませんでした', 3: '位置情報の取得がタイムアウトしました' };
+      setGpsStatus(`<span class="gps-error">⚠ ${msgs[err.code] || '位置情報エラー'}</span>`);
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+  );
+}
+
+// 釣行スタートボタン押下時にGPS取得を開始
+const _origBtnStart = document.getElementById('btnStart');
+_origBtnStart.addEventListener('click', fetchGPS);
+
+// 安全確認モーダルを開いたときも最新状態を表示
+const _origOpenSafety = document.getElementById('btnOpenSafety');
+_origOpenSafety.addEventListener('click', () => {
+  // GPS取得中でなければ（未取得なら）再取得
+  if (gpsState.lat === null) fetchGPS();
 });
 </script>
 </body>
