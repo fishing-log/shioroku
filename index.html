@@ -791,6 +791,49 @@ main { padding-bottom: 100px; }
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── CAMERA / PHOTO ──────────────────────────── */
+.btn-camera {
+  width: 100%;
+  padding: 18px;
+  font-size: 17px; font-weight: 600; font-family: inherit;
+  background: #091828;
+  border: 1.5px dashed #2e8fd1;
+  border-radius: 12px;
+  color: #7ecef0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s;
+}
+.btn-camera:active { background: #0d2035; }
+.catch-photo-preview {
+  width: 100%; max-height: 260px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block; margin-bottom: 8px;
+}
+.btn-photo-delete {
+  width: 100%; padding: 10px;
+  font-size: 14px; font-family: inherit;
+  background: none;
+  border: 1px solid #6a1a1a;
+  border-radius: 10px;
+  color: #e74c3c;
+  cursor: pointer; margin-bottom: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.rec-photo-thumb {
+  width: 58px; height: 58px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0; align-self: center;
+}
+.rec-photo-full {
+  width: 100%; max-height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-top: 8px; display: block;
+}
+
 /* ── CHANCE TIME CARD ─────────────────────────── */
 .chance-band {
   padding: 10px 14px;
@@ -822,6 +865,11 @@ main { padding-bottom: 100px; }
   border: 1px solid #1b3a58;
   border-radius: 10px;
   padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.rec-card-row {
   display: flex;
   gap: 10px;
   align-items: flex-start;
@@ -1064,6 +1112,18 @@ main { padding-bottom: 100px; }
       <div class="sec-lbl">ポイント（任意）</div>
       <input class="spot-input" id="catchSpotInput" type="text"
              placeholder="自分だけのポイント名（例：北の鼻先、沖の根）" autocomplete="off">
+    </div>
+
+    <!-- 6. 写真 -->
+    <div class="sec">
+      <div class="sec-lbl">写真（任意）</div>
+      <!-- iOS Safari では accept="image/*" でカメラ/ライブラリ選択が出る -->
+      <input type="file" accept="image/*" id="cameraInput" style="display:none">
+      <div id="photoPreviewWrap" class="hidden">
+        <img id="photoPreview" class="catch-photo-preview" alt="撮影した写真">
+        <button class="btn-photo-delete" id="btnDeletePhoto">✕ 写真を削除</button>
+      </div>
+      <button class="btn-camera" id="btnCamera">📷 写真を撮る / ライブラリから選ぶ</button>
     </div>
 
   </div><!-- /catch-body -->
@@ -1918,6 +1978,7 @@ const catchRec = {
   flowDir:     null,
   flowSpeed:   null,
   spot:        '',
+  photo:       null,  // base64 JPEG data URL
 };
 
 // ── 現在の潮位・フェーズ計算 ──────────────────
@@ -1970,12 +2031,14 @@ function openCatchModal() {
   catchRec.flowDir     = null;
   catchRec.flowSpeed   = null;
   catchRec.spot        = '';
+  catchRec.photo       = null;
 
   document.querySelectorAll('#fishGrid .fish-chip').forEach(c => c.classList.remove('sel'));
   document.querySelectorAll('#chipFlowDir .chip, #chipFlowSpeed .chip').forEach(c => c.classList.remove('sel'));
   document.getElementById('btnKeepCatch').classList.remove('sel');
   document.getElementById('btnReleaseCatch').classList.remove('sel');
   document.getElementById('catchSpotInput').value = '';
+  updatePhotoPreview(null);
   updateSizeDisplay();
 
   document.getElementById('catchModal').classList.remove('hidden');
@@ -2009,6 +2072,7 @@ function saveCatch() {
     flowDir:     catchRec.flowDir,
     flowSpeed:   catchRec.flowSpeed,
     spot:        document.getElementById('catchSpotInput').value.trim(),
+    photo:       catchRec.photo || null,
     tideHeight:  info ? info.height : null,
     tidePhase:   info ? info.phase  : '',
   };
@@ -2053,6 +2117,9 @@ function renderRecords() {
       </div>
       <div class="rec-size">${sizeStr}</div>
       <div class="rec-badge ${badgeCls}">${badgeLbl}</div>
+      ${rec.photo ? `<img src="${rec.photo}" class="rec-photo-thumb"
+        style="grid-column:1/-1;width:100%;height:auto;max-height:180px;margin-top:6px;"
+        alt="釣果写真">` : ''}
     `;
     list.appendChild(el);
   });
@@ -2255,11 +2322,14 @@ function renderEndCatchList() {
     const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
     const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
     return `<div class="rec-card">
-      <div class="rec-time">${rec.time}</div>
-      <div class="rec-info">
-        <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
-        ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+      <div class="rec-card-row">
+        <div class="rec-time">${rec.time}</div>
+        <div class="rec-info">
+          <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
+          ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+        </div>
       </div>
+      ${rec.photo ? `<img src="${rec.photo}" class="rec-photo-full" alt="釣果写真">` : ''}
     </div>`;
   }).join('');
 }
@@ -2384,6 +2454,7 @@ function buildSummary(totalMins, maxSize) {
       txt += `${r.time}  ${r.species}  ${sz}  ${ph}  ${disp}`;
       if (fl) txt += `  潮:${fl}`;
       if (r.spot) txt += `  📍${r.spot}`;
+      if (r.photo) txt += `  📷`;
       txt += '\n';
     });
   }
@@ -2586,11 +2657,14 @@ function openHistoryDetail(trip) {
         const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
         const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
         return `<div class="rec-card">
-          <div class="rec-time">${rec.time}</div>
-          <div class="rec-info">
-            <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
-            ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+          <div class="rec-card-row">
+            <div class="rec-time">${rec.time}</div>
+            <div class="rec-info">
+              <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
+              ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+            </div>
           </div>
+          ${rec.photo ? `<img src="${rec.photo}" class="rec-photo-full" alt="釣果写真">` : ''}
         </div>`;
       }).join('')
     : '<div style="color:#888;text-align:center;padding:12px;">記録なし</div>';
@@ -2721,6 +2795,7 @@ function buildTripSummary(trip, totalMins, maxSize) {
       txt += `${r.time}  ${r.species}  ${sz}  ${ph}  ${disp}`;
       if (fl) txt += `  潮:${fl}`;
       if (r.spot) txt += `  📍${r.spot}`;
+      if (r.photo) txt += `  📷`;
       txt += '\n';
     });
   }
@@ -2742,6 +2817,62 @@ function buildTripSummary(trip, totalMins, maxSize) {
   txt += '\n#フカセ釣り #館山 #メジナ #潮録';
   return txt;
 }
+
+// ── カメラ / 写真 ──────────────────────────────────
+function compressImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          const r = Math.min(MAX / w, MAX / h);
+          w = Math.round(w * r); h = Math.round(h * r);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updatePhotoPreview(dataURL) {
+  const wrap = document.getElementById('photoPreviewWrap');
+  const img  = document.getElementById('photoPreview');
+  const btn  = document.getElementById('btnCamera');
+  if (dataURL) {
+    img.src = dataURL;
+    wrap.classList.remove('hidden');
+    btn.textContent = '📷 撮り直す';
+  } else {
+    wrap.classList.add('hidden');
+    btn.textContent = '📷 写真を撮る / ライブラリから選ぶ';
+  }
+}
+
+document.getElementById('btnCamera').addEventListener('click', () => {
+  document.getElementById('cameraInput').click();
+});
+
+document.getElementById('cameraInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const dataURL = await compressImage(file);
+  catchRec.photo = dataURL;
+  updatePhotoPreview(dataURL);
+  e.target.value = '';
+});
+
+document.getElementById('btnDeletePhoto').addEventListener('click', () => {
+  catchRec.photo = null;
+  updatePhotoPreview(null);
+});
 </script>
 </body>
 </html>
