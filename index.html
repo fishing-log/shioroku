@@ -1,0 +1,2737 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潮録 — フカセ釣り釣果記録</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  background: #060f1c;
+  color: #cde4f0;
+  min-height: 100vh;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+header {
+  background: linear-gradient(160deg, #0b1f36 0%, #0e2d4a 100%);
+  border-bottom: 1px solid #1b3d5e;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1e6fa8, #0a4a7a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.logo-text h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #7ecef0;
+  line-height: 1;
+}
+.logo-text p {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #5a8aa8;
+  margin-top: 3px;
+}
+
+/* ── MAIN ────────────────────────────────────────────── */
+main {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* ── CARD ────────────────────────────────────────────── */
+.card {
+  background: #0d1f35;
+  border: 1px solid #1b3a58;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+/* ── LOCATION ROW ──────────────────────────────────── */
+.location-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.location-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #a8daf5;
+  letter-spacing: 1px;
+}
+.date-label {
+  font-size: 14px;
+  color: #5a8aa8;
+  letter-spacing: 0.5px;
+}
+
+/* ── STATUS BAR ──────────────────────────────────── */
+.status-bar {
+  font-size: 13px;
+  color: #3d7ca8;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3d7ca8;
+  flex-shrink: 0;
+}
+.status-dot.ok   { background: #27ae60; }
+.status-dot.warn { background: #e67e22; }
+.status-dot.err  { background: #c0392b; }
+
+/* ── CANVAS ──────────────────────────────────────── */
+#tideCanvas {
+  display: block;
+  border-radius: 8px;
+  width: 100%;
+  cursor: crosshair;
+}
+
+/* ── EXTREMES GRID ───────────────────────────────── */
+.extremes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.extreme-card {
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.extreme-card.high { border-left: 3px solid #e74c3c; }
+.extreme-card.low  { border-left: 3px solid #2e86c1; }
+.extreme-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #5a8aa8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.extreme-time {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e8f4fb;
+  line-height: 1;
+}
+.extreme-height {
+  font-size: 14px;
+  color: #7ecef0;
+  margin-top: 4px;
+}
+
+/* ── NOW INFO ──────────────────────────────────── */
+.now-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 18px;
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.now-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #5a8aa8;
+  text-transform: uppercase;
+}
+.now-height {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f0c040;
+  line-height: 1;
+}
+.now-unit {
+  font-size: 13px;
+  color: #7ecef0;
+}
+.tide-trend {
+  font-size: 22px;
+  color: #7ecef0;
+}
+
+/* ── LOADING ──────────────────────────────────── */
+.loading-area {
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3d6a88;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+/* ── SCORE CARD ───────────────────────────────── */
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.score-cell {
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.score-num  { font-size: 30px; font-weight: 700; line-height: 1; }
+.score-lbl  { font-size: 12px; letter-spacing: 1px; color: #5a8aa8; margin-top: 4px; text-transform: uppercase; }
+.session-tag {
+  font-size: 13px;
+  color: #3d7ca8;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.session-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #27ae60;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.5; transform:scale(1.3); }
+}
+
+/* ── BOTTOM ACTION BAR ────────────────────────── */
+main { padding-bottom: 100px; }
+.action-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #060f1c 75%, transparent);
+  z-index: 100;
+}
+.btn-start {
+  display: block;
+  width: 100%;
+  padding: 20px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  font-family: inherit;
+  background: linear-gradient(135deg, #1e8449, #27ae60);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(39,174,96,.45);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-start:active { transform: scale(.97); }
+
+.catch-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.btn-catch, .btn-barra {
+  padding: 22px 8px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-family: inherit;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .1s;
+}
+.btn-catch:active, .btn-barra:active { transform: scale(.95); }
+.btn-catch {
+  background: linear-gradient(135deg, #b03030, #e74c3c);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(231,76,60,.4);
+}
+.btn-barra {
+  background: linear-gradient(135deg, #1a4f7a, #2980b9);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(52,152,219,.35);
+}
+.btn-end {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #5a8aa8;
+  background: none;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── SETUP MODAL ──────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,8,18,.82);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.setup-sheet {
+  background: #0c1d32;
+  border-radius: 20px 20px 0 0;
+  max-height: 93dvh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp .28s cubic-bezier(.25,.8,.25,1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 38px; height: 4px;
+  background: #2a5070;
+  border-radius: 2px;
+  margin: 12px auto 0;
+  flex-shrink: 0;
+}
+.sheet-hdr {
+  padding: 12px 20px 14px;
+  border-bottom: 1px solid #1b3a58;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet-title { font-size: 17px; font-weight: 700; color: #7ecef0; letter-spacing: 2px; }
+.btn-close-sheet {
+  background: none; border: none;
+  color: #5a8aa8; font-size: 22px;
+  cursor: pointer; padding: 4px 8px;
+  line-height: 1;
+}
+.sheet-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 14px 20px 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet-ftr {
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid #1b3a58;
+  flex-shrink: 0;
+}
+
+/* Setup sections */
+.sec {
+  margin-bottom: 20px;
+}
+.sec-lbl {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #5a8aa8;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-lbl::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #1b3a58;
+}
+
+/* Chips */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 10px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1.5px solid #253e56;
+  border-radius: 24px;
+  background: #091828;
+  color: #8ab8d0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.chip:active { opacity: .75; }
+.chip.sel {
+  background: #1a5c96;
+  border-color: #2e8fd1;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 14px;
+  overflow: hidden;
+  width: fit-content;
+}
+.step-btn {
+  width: 54px; height: 54px;
+  background: none; border: none;
+  color: #7ecef0;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.step-btn:active { background: #0f2a42; }
+.step-val {
+  min-width: 70px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #e8f4fb;
+  border-left: 1px solid #1b3a58;
+  border-right: 1px solid #1b3a58;
+  height: 54px;
+  line-height: 54px;
+}
+
+/* Water temp */
+.temp-row { display: flex; align-items: center; gap: 10px; }
+.temp-input {
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  color: #e8f4fb;
+  font-size: 24px;
+  font-family: inherit;
+  padding: 10px 14px;
+  width: 110px;
+  text-align: center;
+  -webkit-appearance: none;
+}
+.temp-input:focus { outline: none; border-color: #2e8fd1; }
+.temp-unit { font-size: 18px; color: #7ecef0; }
+
+.btn-confirm {
+  display: block;
+  width: 100%;
+  padding: 19px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-family: inherit;
+  background: linear-gradient(135deg, #1e8449, #27ae60);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(39,174,96,.4);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-confirm:active { transform: scale(.98); }
+
+/* ── CATCH RECORD MODAL ──────────────────────── */
+.catch-modal {
+  position: fixed;
+  inset: 0;
+  background: #060f1c;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUp .22s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.catch-hdr {
+  background: #0b1f36;
+  border-bottom: 1px solid #1b3a58;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.catch-title { font-size: 18px; font-weight: 700; color: #7ecef0; letter-spacing: 2px; }
+.btn-close-catch {
+  background: none; border: none;
+  color: #5a8aa8; font-size: 24px;
+  cursor: pointer; padding: 2px 8px; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.catch-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 14px 16px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.catch-ftr {
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid #1b3a58;
+  background: #0b1f36;
+  flex-shrink: 0;
+}
+.btn-record {
+  display: block; width: 100%;
+  padding: 20px;
+  font-size: 19px; font-weight: 700;
+  letter-spacing: 3px; font-family: inherit;
+  background: linear-gradient(135deg, #b03030, #e74c3c);
+  color: #fff; border: none; border-radius: 14px; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(231,76,60,.4);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-record:active { transform: scale(.98); }
+
+/* Fish species grid */
+.fish-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.fish-chip {
+  padding: 15px 8px;
+  font-size: 16px; text-align: center;
+  font-family: inherit;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  background: #091828;
+  color: #8ab8d0;
+  cursor: pointer; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.fish-chip.sel {
+  background: #1a3d5c;
+  border-color: #2e8fd1;
+  color: #fff; font-weight: 700;
+}
+.fish-chip:active { opacity: .8; }
+
+/* Size input */
+.size-display {
+  text-align: center;
+  font-size: 60px; font-weight: 700;
+  color: #cde4f0; line-height: 1;
+  padding: 14px 0 10px;
+  letter-spacing: 2px;
+  min-height: 90px;
+}
+.size-display .s-unit { font-size: 22px; color: #3d7ca8; margin-left: 4px; }
+.size-display.has-val  { color: #7ecef0; }
+
+.preset-row {
+  display: flex; gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.preset-btn {
+  padding: 10px 18px;
+  font-size: 17px; font-family: inherit;
+  border: 1.5px solid #253e56;
+  border-radius: 10px;
+  background: #0d1f35; color: #8ab8d0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.preset-btn:active { background: #1a3d5c; color: #fff; }
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 340px;
+  margin: 0 auto;
+}
+.key-btn {
+  height: 62px;
+  font-size: 24px; font-weight: 500;
+  font-family: inherit;
+  border: 1px solid #1b3a58;
+  border-radius: 12px;
+  background: #0d1f35; color: #cde4f0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .08s;
+}
+.key-btn:active { background: #1a3d5c; }
+.key-clear { color: #e67e22; font-size: 18px; }
+.key-back  { color: #5a8aa8; font-size: 22px; }
+
+/* Keep / Release */
+.disp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.disp-btn {
+  padding: 18px 8px;
+  font-size: 18px; font-weight: 600;
+  font-family: inherit;
+  border: 2px solid #253e56;
+  border-radius: 14px;
+  background: #091828; color: #8ab8d0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all .12s;
+}
+.disp-btn:active { opacity: .8; }
+.disp-keep.sel {
+  background: #0e3020; border-color: #27ae60;
+  color: #4ddd7c; font-weight: 700;
+}
+.disp-release.sel {
+  background: #0e2040; border-color: #2e8fd1;
+  color: #7ecef0; font-weight: 700;
+}
+
+/* Records list */
+.records-hdr {
+  font-size: 13px; letter-spacing: 2px;
+  color: #5a8aa8; text-transform: uppercase;
+  padding: 14px 0 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.records-hdr::after { content:''; flex:1; height:1px; background:#1b3a58; }
+.records-list { display: flex; flex-direction: column; gap: 6px; }
+.record-item {
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 36px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+.rec-time  { font-size: 14px; color: #5a8aa8; }
+.rec-info  {}
+.rec-species { font-size: 17px; font-weight: 700; color: #e8f4fb; }
+.rec-tide  { font-size: 13px; color: #3d6a88; margin-top: 2px; }
+.rec-size  { font-size: 16px; font-weight: 600; color: #7ecef0; text-align: right; }
+.rec-badge {
+  font-size: 13px; padding: 4px 8px;
+  border-radius: 10px; text-align: center;
+}
+.badge-keep    { background: #0e3020; color: #4ddd7c; }
+.badge-release { background: #0e2040; color: #7ecef0; }
+.no-records    { font-size: 15px; color: #2a5070; text-align: center; padding: 14px 0; }
+
+/* ── MEMO / TEXTAREA ─────────────────────────── */
+.memo-textarea {
+  width: 100%;
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  color: #cde4f0;
+  font-size: 16px;
+  font-family: inherit;
+  padding: 12px 14px;
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.memo-textarea:focus { outline: none; border-color: #2e8fd1; }
+.memo-textarea::placeholder { color: #2a5070; }
+
+/* ── END SCREEN ──────────────────────────────── */
+.end-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.end-stat-cell {
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 12px 6px;
+  text-align: center;
+}
+.end-stat-num { font-size: 28px; font-weight: 700; line-height: 1; }
+.end-stat-lbl { font-size: 12px; color: #5a8aa8; margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+.graph-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #5a8aa8;
+  margin: 6px 0 14px;
+  align-items: center;
+}
+.legend-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#e74c3c; margin-right:4px; }
+.legend-x   { display:inline-block; color:#3498db; font-weight:700; margin-right:4px; }
+
+.summary-textarea {
+  width: 100%;
+  background: #040d18;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  color: #7a9cb0;
+  font-size: 12px;
+  font-family: 'Menlo', 'Courier New', monospace;
+  padding: 12px;
+  min-height: 200px;
+  resize: none;
+  line-height: 1.7;
+}
+
+.btn-copy {
+  display: block; width: 100%;
+  padding: 16px;
+  font-size: 17px; font-weight: 700;
+  letter-spacing: 2px; font-family: inherit;
+  background: linear-gradient(135deg, #1a4a7a, #2e86c1);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer; margin-top: 10px;
+  box-shadow: 0 4px 16px rgba(46,134,193,.35);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-copy:active { transform: scale(.98); }
+
+.btn-home-end {
+  background: none; border: 1px solid #1b3a58;
+  color: #5a8aa8; font-size: 15px; font-family: inherit;
+  cursor: pointer; padding: 6px 12px; border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── SAFETY ──────────────────────────────────── */
+.btn-safety {
+  display: block; width: 100%;
+  padding: 13px;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 1px; font-family: inherit;
+  color: #e67e22;
+  background: none;
+  border: 1.5px solid #7a3a08;
+  border-radius: 12px;
+  cursor: pointer; margin-bottom: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-safety:active { background: #1e1008; }
+
+.safety-preview {
+  background: #040d18;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 14px;
+  color: #8ab8d0;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+.safety-time-input {
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  color: #e8f4fb;
+  font-size: 22px;
+  font-family: inherit;
+  padding: 10px 14px;
+  width: 160px;
+}
+.safety-time-input:focus { outline: none; border-color: #2e8fd1; }
+
+.btn-line {
+  display: block; width: 100%;
+  padding: 17px;
+  font-size: 17px; font-weight: 700; font-family: inherit;
+  background: #06c755; color: #fff;
+  border: none; border-radius: 12px;
+  cursor: pointer; margin-bottom: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-sms {
+  display: block; width: 100%;
+  padding: 17px;
+  font-size: 17px; font-weight: 700; font-family: inherit;
+  background: linear-gradient(135deg, #1a5276, #2980b9);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── CHANCE TIME CARD ─────────────────────────── */
+.chance-band {
+  padding: 10px 14px;
+  background: rgba(240,192,64,0.08);
+  border: 1px solid rgba(240,192,64,0.28);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.chance-time  { font-size: 20px; font-weight: 700; color: #f0c040; }
+.chance-label { font-size: 13px; color: #a88a40; margin-top: 3px; }
+
+/* ── SPOT INPUT ───────────────────────────────── */
+.spot-input {
+  width: 100%;
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  color: #e8f4fb;
+  font-size: 18px;
+  font-family: inherit;
+  padding: 12px 14px;
+}
+.spot-input:focus { outline: none; border-color: #2e8fd1; }
+.spot-input::placeholder { color: #2a5070; }
+
+/* ── END SCREEN RECORD CARD ──────────────────── */
+.rec-card {
+  background: #091828;
+  border: 1px solid #1b3a58;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.rec-card .rec-time { flex-shrink: 0; padding-top: 2px; }
+.rec-card .rec-info { flex: 1; min-width: 0; }
+
+/* ── HISTORY BUTTON ──────────────────────────── */
+.btn-history {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-family: inherit;
+  color: #7ecef0;
+  background: none;
+  border: 1px solid #1b3a58;
+  border-radius: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-history:active { background: #0d1f35; }
+
+/* ── HISTORY LIST ────────────────────────────── */
+.history-item {
+  background: #0d1f35;
+  border: 1px solid #1b3a58;
+  border-radius: 12px;
+  padding: 14px 50px 14px 16px;
+  margin-bottom: 10px;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.history-item:active { background: #1a3050; }
+.history-date  { font-size: 16px; font-weight: 700; color: #a8daf5; margin-bottom: 6px; }
+.history-stats { display: flex; flex-wrap: wrap; gap: 12px; font-size: 14px; }
+.history-stat-catch { color: #e74c3c; font-weight: 600; }
+.history-stat-size  { color: #7ecef0; }
+.history-stat-dur   { color: #5a8aa8; }
+.history-arrow {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px; color: #2a5070; pointer-events: none;
+}
+.btn-delete-trip {
+  position: absolute; right: 38px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: #3d5570; font-size: 17px;
+  cursor: pointer; padding: 8px 6px;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+.btn-delete-trip:active { color: #e74c3c; }
+.history-empty {
+  text-align: center; color: #3d6a88;
+  font-size: 15px; padding: 60px 20px; line-height: 1.8;
+}
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">🎣</div>
+  <div class="logo-text">
+    <h1>潮 録</h1>
+    <p>フカセ釣り 釣果記録</p>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="location-row">
+      <span class="location-name">📍 館山（千葉県）</span>
+      <span class="date-label" id="dateLabel">—</span>
+    </div>
+    <div class="status-bar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">潮汐データを読み込み中...</span>
+    </div>
+
+    <div class="now-info" id="nowInfo" style="display:none;">
+      <div>
+        <div class="now-label">現在の潮位</div>
+        <div>
+          <span class="now-height" id="nowHeight">—</span>
+          <span class="now-unit"> cm</span>
+        </div>
+      </div>
+      <div class="tide-trend" id="tideTrend" title="潮汐の向き"></div>
+      <div>
+        <div class="now-label">次の転潮</div>
+        <div id="nextTurn" style="font-size:13px; color:#7ecef0; margin-top:4px;">—</div>
+      </div>
+    </div>
+
+    <div class="loading-area" id="loadingArea">データ取得中...</div>
+    <canvas id="tideCanvas" style="display:none;"></canvas>
+
+    <div class="extremes-grid" id="extremesGrid"></div>
+  </div>
+
+  <!-- ── チャンスタイムカード ── -->
+  <div class="card hidden" id="chanceCard">
+    <div style="font-size:15px;font-weight:700;color:#f0c040;letter-spacing:2px;margin-bottom:10px;">⭐ おすすめチャンスタイム</div>
+    <div id="chanceList"></div>
+    <div style="font-size:12px;color:#3d6a88;margin-top:6px;line-height:1.5;">満潮前後1時間〜下げ潮30%（グラフ上の金色帯）</div>
+  </div>
+
+  <!-- ── 釣行スコアカード（釣行中のみ表示）── -->
+  <div id="scoreArea" class="card hidden">
+    <div class="score-row">
+      <div class="score-cell">
+        <div class="score-num" id="catchCount" style="color:#e74c3c">0</div>
+        <div class="score-lbl">釣果</div>
+      </div>
+      <div class="score-cell">
+        <div class="score-num" id="barraCount" style="color:#2e8fd1">0</div>
+        <div class="score-lbl">バラシ</div>
+      </div>
+      <div class="score-cell">
+        <div class="score-num" id="elapsedTime" style="color:#7ecef0; font-size:22px">0分</div>
+        <div class="score-lbl">経過時間</div>
+      </div>
+    </div>
+    <div class="session-tag">
+      <span class="session-dot"></span>
+      <span id="sessionStartLabel">釣行中</span>
+    </div>
+    <div class="records-hdr">釣果一覧</div>
+    <div class="records-list" id="recordsList">
+      <div class="no-records">まだ釣果がありません</div>
+    </div>
+  </div>
+</main>
+
+<!-- ── 釣果記録モーダル ───────────────────────────── -->
+<div class="catch-modal hidden" id="catchModal">
+  <div class="catch-hdr">
+    <button class="btn-close-catch" id="btnCloseCatch">✕</button>
+    <span class="catch-title">釣果記録</span>
+    <div style="width:44px"></div>
+  </div>
+
+  <div class="catch-body">
+
+    <!-- 1. 魚種 -->
+    <div class="sec">
+      <div class="sec-lbl">魚 種</div>
+      <div class="fish-grid" id="fishGrid">
+        <div class="fish-chip" data-val="口太メジナ">口太メジナ</div>
+        <div class="fish-chip" data-val="尾長メジナ">尾長メジナ</div>
+        <div class="fish-chip" data-val="クロダイ">クロダイ</div>
+        <div class="fish-chip" data-val="イサキ">イサキ</div>
+        <div class="fish-chip" data-val="ヘダイ">ヘダイ</div>
+        <div class="fish-chip" data-val="コロダイ">コロダイ</div>
+        <div class="fish-chip" data-val="フエフキ">フエフキ</div>
+        <div class="fish-chip" data-val="フエダイ">フエダイ</div>
+        <div class="fish-chip" data-val="オジサン">オジサン</div>
+        <div class="fish-chip" data-val="メバル">メバル</div>
+        <div class="fish-chip" data-val="ブダイ">ブダイ</div>
+        <div class="fish-chip" data-val="タカノハダイ">タカノハダイ</div>
+        <div class="fish-chip" data-val="アイゴ">アイゴ</div>
+        <div class="fish-chip" data-val="イスズミ">イスズミ</div>
+        <div class="fish-chip" data-val="ウツボ">ウツボ</div>
+        <div class="fish-chip" data-val="その他">その他</div>
+      </div>
+    </div>
+
+    <!-- 2. サイズ -->
+    <div class="sec">
+      <div class="sec-lbl">サイズ</div>
+      <div class="size-display" id="sizeDisplay">
+        <span class="s-dash">--</span><span class="s-unit"> cm</span>
+      </div>
+      <div class="preset-row">
+        <button class="preset-btn" data-size="30">30</button>
+        <button class="preset-btn" data-size="35">35</button>
+        <button class="preset-btn" data-size="40">40</button>
+        <button class="preset-btn" data-size="45">45</button>
+        <button class="preset-btn" data-size="50">50</button>
+        <button class="preset-btn" data-size="55">55</button>
+      </div>
+      <div class="keypad-grid">
+        <button class="key-btn" data-key="1">1</button>
+        <button class="key-btn" data-key="2">2</button>
+        <button class="key-btn" data-key="3">3</button>
+        <button class="key-btn" data-key="4">4</button>
+        <button class="key-btn" data-key="5">5</button>
+        <button class="key-btn" data-key="6">6</button>
+        <button class="key-btn" data-key="7">7</button>
+        <button class="key-btn" data-key="8">8</button>
+        <button class="key-btn" data-key="9">9</button>
+        <button class="key-btn key-clear" data-key="C">クリア</button>
+        <button class="key-btn" data-key="0">0</button>
+        <button class="key-btn key-back" data-key="B">⌫</button>
+      </div>
+    </div>
+
+    <!-- 3. キープ / リリース -->
+    <div class="sec">
+      <div class="sec-lbl">キープ / リリース</div>
+      <div class="disp-row">
+        <button class="disp-btn disp-keep"    id="btnKeepCatch">🧊 キープ</button>
+        <button class="disp-btn disp-release" id="btnReleaseCatch">🌊 リリース</button>
+      </div>
+    </div>
+
+    <!-- 4. 潮の流れ — 方向 -->
+    <div class="sec">
+      <div class="sec-lbl">潮の流れ — 方向</div>
+      <div class="chip-group" id="chipFlowDir">
+        <div class="chip" data-val="右流れ">右流れ</div>
+        <div class="chip" data-val="左流れ">左流れ</div>
+        <div class="chip" data-val="当て潮">当て潮</div>
+        <div class="chip" data-val="払い出し">払い出し</div>
+        <div class="chip" data-val="止まり">止まり</div>
+      </div>
+    </div>
+
+    <!-- 4. 潮の流れ — 速さ -->
+    <div class="sec">
+      <div class="sec-lbl">潮の流れ — 速さ</div>
+      <div class="chip-group" id="chipFlowSpeed">
+        <div class="chip" data-val="速い">速い</div>
+        <div class="chip" data-val="普通">普通</div>
+        <div class="chip" data-val="遅い">遅い</div>
+        <div class="chip" data-val="止まり">止まり</div>
+      </div>
+    </div>
+
+    <!-- 5. ポイントメモ -->
+    <div class="sec">
+      <div class="sec-lbl">ポイント（任意）</div>
+      <input class="spot-input" id="catchSpotInput" type="text"
+             placeholder="自分だけのポイント名（例：北の鼻先、沖の根）" autocomplete="off">
+    </div>
+
+  </div><!-- /catch-body -->
+
+  <div class="catch-ftr">
+    <button class="btn-record" id="btnRecord">📝 記録する</button>
+  </div>
+</div>
+
+<!-- ── バラシ記録モーダル ─────────────────────────── -->
+<div class="catch-modal hidden" id="barraModal">
+  <div class="catch-hdr">
+    <button class="btn-close-catch" id="btnCloseBarra">✕</button>
+    <span class="catch-title">バラシ記録</span>
+    <div style="width:44px"></div>
+  </div>
+  <div class="catch-body">
+
+    <!-- 原因（必須） -->
+    <div class="sec">
+      <div class="sec-lbl">原因</div>
+      <div class="chip-group" id="chipBarraCause">
+        <div class="chip" data-val="ハリハズレ">ハリハズレ</div>
+        <div class="chip" data-val="ハリス切れ（根ズレ）">ハリス切れ（根ズレ）</div>
+        <div class="chip" data-val="ハリス切れ（直線強度）">ハリス切れ（直線強度）</div>
+        <div class="chip" data-val="ハリ伸ばされ">ハリ伸ばされ</div>
+        <div class="chip" data-val="タモ入れ失敗">タモ入れ失敗</div>
+        <div class="chip" data-val="自然バレ">自然バレ</div>
+        <div class="chip" data-val="その他">その他</div>
+      </div>
+    </div>
+
+    <!-- 推定魚種（任意） -->
+    <div class="sec">
+      <div class="sec-lbl">推定魚種（任意）</div>
+      <div class="fish-grid" id="barraFishGrid"></div>
+    </div>
+
+    <!-- 推定サイズ（任意） -->
+    <div class="sec">
+      <div class="sec-lbl">推定サイズ（任意）</div>
+      <div class="size-display" id="barraSizeDisplay">
+        <span style="color:#2a5070">--</span><span class="s-unit"> cm</span>
+      </div>
+      <div class="preset-row" id="barraPresets"></div>
+      <div class="keypad-grid" id="barraKeypad"></div>
+    </div>
+
+    <!-- メモ -->
+    <div class="sec">
+      <div class="sec-lbl">メモ（任意）</div>
+      <textarea class="memo-textarea" id="barraMemo"
+        placeholder="例）タモを構えた瞬間に走られた…"></textarea>
+    </div>
+
+  </div>
+  <div class="catch-ftr">
+    <button class="btn-record"
+      style="background:linear-gradient(135deg,#1a4a7a,#2e86c1);box-shadow:0 4px 18px rgba(46,134,193,.4)"
+      id="btnSaveBarra">📝 記録する</button>
+  </div>
+</div>
+
+<!-- ── 釣行終了画面 ──────────────────────────────── -->
+<div class="catch-modal hidden" id="endScreen">
+  <div class="catch-hdr">
+    <button class="btn-home-end" id="btnBackHome">← ホームへ</button>
+    <span class="catch-title">釣行終了</span>
+    <div style="width:72px"></div>
+  </div>
+  <div class="catch-body">
+
+    <div class="end-stat-row">
+      <div class="end-stat-cell">
+        <div class="end-stat-num" id="endCatchCount" style="color:#e74c3c">0</div>
+        <div class="end-stat-lbl">釣果</div>
+      </div>
+      <div class="end-stat-cell">
+        <div class="end-stat-num" id="endMaxSize" style="color:#7ecef0">--</div>
+        <div class="end-stat-lbl">最大 cm</div>
+      </div>
+      <div class="end-stat-cell">
+        <div class="end-stat-num" id="endDuration" style="color:#f0c040;font-size:20px">0分</div>
+        <div class="end-stat-lbl">釣行時間</div>
+      </div>
+    </div>
+
+    <div style="border-radius:8px;overflow:hidden;">
+      <canvas id="summaryCanvas"></canvas>
+    </div>
+    <div class="graph-legend">
+      <span><span class="legend-dot"></span>釣果（円の大きさ＝魚のサイズ）</span>
+      <span><span class="legend-x">✕</span>バラシ</span>
+    </div>
+
+    <div class="records-hdr">釣果一覧</div>
+    <div class="records-list" id="endCatchList" style="margin-bottom:16px;"></div>
+
+    <div class="sec-lbl" style="margin-bottom:8px;">ブログ用サマリー</div>
+    <textarea class="summary-textarea" id="summaryText" readonly></textarea>
+    <button class="btn-copy" id="btnCopySummary">📋 クリップボードにコピー</button>
+
+  </div>
+</div>
+
+<!-- ── 安全確認モーダル ────────────────────────────── -->
+<div class="modal-overlay hidden" id="safetyModal">
+  <div class="setup-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title">🆘 安全確認</span>
+      <button class="btn-close-sheet" id="btnCloseSafety">✕</button>
+    </div>
+    <div class="sheet-body">
+      <p style="font-size:13px;color:#5a8aa8;margin-bottom:16px;line-height:1.6;">
+        釣行開始を家族や友人に知らせましょう。予定終了時刻を入力するとメッセージに含まれます。
+      </p>
+      <div class="sec">
+        <div class="sec-lbl">予定終了時刻（任意）</div>
+        <input class="safety-time-input" type="time" id="safetyEndTime">
+      </div>
+      <div class="sec">
+        <div class="sec-lbl">送信メッセージ</div>
+        <div class="safety-preview" id="safetyPreview"></div>
+      </div>
+    </div>
+    <div class="sheet-ftr" style="display:flex;flex-direction:column;gap:0;">
+      <button class="btn-line" id="btnSendLine">🟢 LINEで送る</button>
+      <button class="btn-sms"  id="btnSendSMS">📱 SMSで送る</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 過去の釣行 一覧 ──────────────────────────── -->
+<div class="catch-modal hidden" id="historyList" style="z-index:400;">
+  <div class="catch-hdr">
+    <button class="btn-close-catch" id="btnCloseHistory">✕</button>
+    <span class="catch-title">過去の釣行</span>
+    <div style="width:44px"></div>
+  </div>
+  <div class="catch-body" id="historyListBody"></div>
+</div>
+
+<!-- ── 過去の釣行 詳細 ──────────────────────────── -->
+<div class="catch-modal hidden" id="historyDetail" style="z-index:500;">
+  <div class="catch-hdr">
+    <button class="btn-home-end" id="btnBackToList">← 一覧へ</button>
+    <span class="catch-title" id="historyDetailTitle">釣行詳細</span>
+    <div style="width:72px"></div>
+  </div>
+  <div class="catch-body" id="historyDetailBody"></div>
+</div>
+
+<!-- ── ボトムアクションバー ─────────────────────── -->
+<div class="action-bar" id="actionBar">
+  <div id="preTripBar">
+    <button class="btn-history" id="btnHistory">📖 過去の釣行を見る</button>
+    <button class="btn-start"   id="btnStart">🎣 釣行スタート</button>
+  </div>
+  <div id="activeBar" class="hidden">
+    <button class="btn-end" id="btnEnd">■ 釣行を終了する</button>
+    <div class="catch-row">
+      <button class="btn-catch" id="btnCatch">🐟 釣れた！</button>
+      <button class="btn-barra" id="btnBarra">💨 バラシ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── セットアップモーダル ──────────────────────── -->
+<div class="modal-overlay hidden" id="setupModal">
+  <div class="setup-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title">仕掛け設定</span>
+      <button class="btn-close-sheet" id="btnCloseSetup">✕</button>
+    </div>
+
+    <div class="sheet-body">
+
+      <!-- タックル -->
+      <div class="sec">
+        <div class="sec-lbl">タックル</div>
+        <div class="chip-group" id="chipTackle">
+          <div class="chip sel" data-val="重タックル 3号">重タックル 3号</div>
+          <div class="chip"     data-val="軽タックル 1.25号">軽タックル 1.25号</div>
+        </div>
+      </div>
+
+      <!-- ウキ 種類 -->
+      <div class="sec">
+        <div class="sec-lbl">ウキ 種類</div>
+        <div class="chip-group" id="chipFloatType">
+          <div class="chip sel" data-val="自作">自作</div>
+          <div class="chip"     data-val="棒ウキ">棒ウキ</div>
+          <div class="chip"     data-val="円錐ウキ">円錐ウキ</div>
+        </div>
+      </div>
+
+      <!-- ウキ 浮力 -->
+      <div class="sec">
+        <div class="sec-lbl">ウキ 浮力</div>
+        <div class="chip-group" id="chipBuoyancy">
+          <div class="chip"     data-val="000">000</div>
+          <div class="chip"     data-val="00">00</div>
+          <div class="chip sel" data-val="0">0</div>
+          <div class="chip"     data-val="G5">G5</div>
+          <div class="chip"     data-val="G2">G2</div>
+          <div class="chip"     data-val="B">B</div>
+          <div class="chip"     data-val="2B">2B</div>
+          <div class="chip"     data-val="3B">3B</div>
+          <div class="chip"     data-val="4B">4B</div>
+          <div class="chip"     data-val="5B">5B</div>
+          <div class="chip"     data-val="6B">6B</div>
+        </div>
+      </div>
+
+      <!-- ハリス -->
+      <div class="sec">
+        <div class="sec-lbl">ハリス（号）</div>
+        <div class="chip-group" id="chipLeader">
+          <div class="chip"     data-val="1">1</div>
+          <div class="chip sel" data-val="1.5">1.5</div>
+          <div class="chip"     data-val="1.75">1.75</div>
+          <div class="chip"     data-val="2">2</div>
+          <div class="chip"     data-val="2.5">2.5</div>
+          <div class="chip"     data-val="3">3</div>
+          <div class="chip"     data-val="4">4</div>
+          <div class="chip"     data-val="5">5</div>
+          <div class="chip"     data-val="6">6</div>
+          <div class="chip"     data-val="7">7</div>
+          <div class="chip"     data-val="8">8</div>
+        </div>
+      </div>
+
+      <!-- ハリ 種類 -->
+      <div class="sec">
+        <div class="sec-lbl">ハリ 種類</div>
+        <div class="chip-group" id="chipHookType">
+          <div class="chip sel" data-val="グレバリ">グレバリ</div>
+          <div class="chip"     data-val="チヌバリ">チヌバリ</div>
+        </div>
+      </div>
+
+      <!-- ハリ 号数 -->
+      <div class="sec">
+        <div class="sec-lbl">ハリ 号数</div>
+        <div class="stepper">
+          <button class="step-btn" id="hookMinus">−</button>
+          <div class="step-val"   id="hookSizeVal">6号</div>
+          <button class="step-btn" id="hookPlus">＋</button>
+        </div>
+      </div>
+
+      <!-- 付け餌 -->
+      <div class="sec">
+        <div class="sec-lbl">付け餌</div>
+        <div class="chip-group" id="chipBait">
+          <div class="chip"     data-val="オキアミM">オキアミM</div>
+          <div class="chip sel" data-val="オキアミL">オキアミL</div>
+          <div class="chip"     data-val="オキアミ2L">オキアミ2L</div>
+          <div class="chip"     data-val="自家製ハード">自家製ハード</div>
+          <div class="chip"     data-val="生イキくんL">生イキくんL</div>
+          <div class="chip"     data-val="甘エビ">甘エビ</div>
+          <div class="chip"     data-val="ノリ">ノリ</div>
+          <div class="chip"     data-val="その他">その他</div>
+        </div>
+      </div>
+
+      <!-- コマセ（複数選択可） -->
+      <div class="sec">
+        <div class="sec-lbl">コマセ（複数選択可）</div>
+        <div class="chip-group" id="chipChum">
+          <div class="chip sel" data-val="オキアミ3kg">オキアミ 3kg</div>
+          <div class="chip"     data-val="オキアミ6kg">オキアミ 6kg</div>
+          <div class="chip"     data-val="アミエビ1kg">アミエビ 1kg</div>
+          <div class="chip"     data-val="夜釣りパワー白">夜釣りパワー白</div>
+          <div class="chip"     data-val="グレパン">グレパン</div>
+          <div class="chip"     data-val="V9">V9</div>
+          <div class="chip"     data-val="V10">V10</div>
+        </div>
+      </div>
+
+      <!-- 風向き -->
+      <div class="sec">
+        <div class="sec-lbl">風向き</div>
+        <div class="chip-group" id="chipWind">
+          <div class="chip" data-val="北">北</div>
+          <div class="chip" data-val="北東">北東</div>
+          <div class="chip" data-val="東">東</div>
+          <div class="chip" data-val="南東">南東</div>
+          <div class="chip" data-val="南">南</div>
+          <div class="chip" data-val="南西">南西</div>
+          <div class="chip" data-val="西">西</div>
+          <div class="chip" data-val="北西">北西</div>
+          <div class="chip" data-val="凪">凪</div>
+        </div>
+      </div>
+
+      <!-- 水温 -->
+      <div class="sec">
+        <div class="sec-lbl">水温</div>
+        <div class="temp-row">
+          <input class="temp-input" id="waterTempInput"
+                 type="number" step="0.5" min="0" max="35" placeholder="—">
+          <span class="temp-unit">℃</span>
+        </div>
+      </div>
+
+    </div><!-- /sheet-body -->
+
+    <div class="sheet-ftr">
+      <button class="btn-safety" id="btnOpenSafety">🆘 安全確認を送る（任意）</button>
+      <button class="btn-confirm" id="btnConfirm">釣行開始！ 🎣</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const STATION    = 'TK';
+const DATUM_NOTE = '潮位基準面（CDL）上cm';
+const SPH        = 60; // Catmull-Rom補間: 1時間あたりのサンプル数（= 1分解像度）
+
+function today() { return new Date(); }
+
+function dayOfYear(d) {
+  return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('ja-JP', {
+    year:'numeric', month:'long', day:'numeric', weekday:'short'
+  });
+}
+
+function formatTime(totalMinutes) {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+// ── 気象庁 TK.txt パーサー ─────────────────────────
+function parseLine(line) {
+  const values = [];
+  for (let i = 0; i < 24; i++) {
+    const v = parseInt(line.substring(i * 3, i * 3 + 3), 10);
+    if (isNaN(v)) return null;
+    values.push(v);
+  }
+  return values;
+}
+
+async function fetchJMATide(date) {
+  const url = `https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/${date.getFullYear()}/${STATION}.txt`;
+  const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const lines = (await res.text()).split('\n').filter(l => l.trim());
+  const line  = lines[dayOfYear(date) - 1];
+  if (!line) throw new Error('行が見つかりません');
+  const values = parseLine(line);
+  if (!values) throw new Error('パース失敗');
+  return values;
+}
+
+// ── フォールバック: 調和定数法近似 ─────────────────
+const HARMONICS = [
+  { speed:28.9841042, amp:72, phase:210 },
+  { speed:30.0,       amp:18, phase:200 },
+  { speed:15.0410686, amp:18, phase:170 },
+  { speed:13.9430356, amp:10, phase:150 },
+  { speed:28.4397295, amp:14, phase:220 },
+];
+
+function approxTide(date) {
+  const baseH = (date - new Date('2000-01-01T12:00:00Z')) / 3600000;
+  return Array.from({ length: 24 }, (_, h) => {
+    let v = 100;
+    for (const hc of HARMONICS)
+      v += hc.amp * Math.cos((hc.speed * (baseH + h) - hc.phase) * Math.PI / 180);
+    return Math.round(v);
+  });
+}
+
+// ── Catmull-Rom スプライン補間 ─────────────────────
+// 24点の毎時データ → 24*SPH+1 = 1441点（1分解像度）
+// 前後の隣接点を接線として使うため、単純ベジェより大幅に滑らか
+function catmullRomInterpolate(ys, sph) {
+  // 末端を線形外挿して 0:00〜24:00 をカバー
+  const ext = [...ys, ys[23] + (ys[23] - ys[22])]; // 25要素
+  const n   = ext.length;
+  const out = [];
+
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = ext[Math.max(0,     i - 1)];
+    const p1 = ext[i];
+    const p2 = ext[i + 1];
+    const p3 = ext[Math.min(n - 1, i + 2)];
+
+    for (let s = 0; s < sph; s++) {
+      const t  = s / sph;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      out.push(0.5 * (
+          2 * p1
+        + (-p0 + p2)                    * t
+        + (2*p0 - 5*p1 + 4*p2 - p3)    * t2
+        + (-p0 + 3*p1 - 3*p2 + p3)     * t3
+      ));
+    }
+  }
+  out.push(ext[n - 1]); // 24:00 の終点
+  return out; // 1441点
+}
+
+// ── 満潮・干潮の検出（dense配列から、分単位の精度） ─
+function findExtremes(dense, sph) {
+  const pts = [], N = dense.length;
+  for (let i = 2; i < N - 2; i++) {
+    const v = dense[i];
+    if (v > dense[i-2] && v > dense[i-1] && v > dense[i+1] && v > dense[i+2]) {
+      pts.push({ type:'high', sampleIdx:i, totalMinutes:Math.round(i/sph*60), height:Math.round(v) });
+    } else if (v < dense[i-2] && v < dense[i-1] && v < dense[i+1] && v < dense[i+2]) {
+      pts.push({ type:'low',  sampleIdx:i, totalMinutes:Math.round(i/sph*60), height:Math.round(v) });
+    }
+  }
+  return pts;
+}
+
+// ── Canvas グラフ描画 ──────────────────────────────
+// dense: 1441点の補間済み配列, sph: SPH, extremes: 事前計算済み
+function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = []) {
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth - 40;
+  const H   = 240;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx  = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const PAD  = { top:20, right:16, bottom:38, left:46 };
+  const GW   = W - PAD.left - PAD.right;
+  const GH   = H - PAD.top  - PAD.bottom;
+  const LAST = dense.length - 1; // 1440
+
+  const minV = Math.min(...dense), maxV = Math.max(...dense);
+  const span = maxV - minV || 1;
+
+  // サンプルインデックス→x座標（0→0:00, 1440→24:00）
+  const xOf = (idx) => PAD.left + (idx / LAST) * GW;
+  const yOf = (v)   => PAD.top  + GH - ((v - minV) / span) * GH;
+
+  // 背景
+  ctx.fillStyle = '#091828';
+  ctx.fillRect(0, 0, W, H);
+
+  // チャンスタイム帯（金色ハイライト）
+  chanceBands.forEach(band => {
+    const x1 = PAD.left + (band.start / 1440) * GW;
+    const x2 = PAD.left + (band.end   / 1440) * GW;
+    ctx.fillStyle = 'rgba(240,192,64,0.13)';
+    ctx.fillRect(x1, PAD.top, Math.max(0, x2 - x1), GH);
+    ctx.strokeStyle = 'rgba(240,192,64,0.35)';
+    ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(x1, PAD.top); ctx.lineTo(x1, PAD.top + GH);
+    ctx.moveTo(x2, PAD.top); ctx.lineTo(x2, PAD.top + GH);
+    ctx.stroke();
+  });
+
+  // 水平グリッド
+  ctx.font = `11px 'Hiragino Kaku Gothic ProN', sans-serif`;
+  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
+    const v = minV + span * frac, y = yOf(v);
+    ctx.strokeStyle = '#1a3555'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + GW, y); ctx.stroke();
+    ctx.fillStyle = '#3d7ca8'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(v) + 'cm', PAD.left - 4, y + 3.5);
+  });
+
+  // 垂直グリッド（3時間ごと）
+  for (let h = 0; h <= 24; h += 3) {
+    const x = PAD.left + (h / 24) * GW;
+    ctx.strokeStyle = '#1a3555'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, PAD.top + GH); ctx.stroke();
+    ctx.fillStyle = '#3d7ca8'; ctx.textAlign = 'center';
+    ctx.fillText(h === 0 ? '0' : h + ':00', x, H - 8);
+  }
+
+  // 現在時刻ライン
+  if (nowH >= 0 && nowH <= 24) {
+    const cx = PAD.left + (nowH / 24) * GW;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(240,192,64,0.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx, PAD.top); ctx.lineTo(cx, PAD.top + GH); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // ── グラデーション塗りつぶし（1441点の lineTo で完全スムース）──
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + GH);
+  grad.addColorStop(0, 'rgba(30,111,168,0.55)');
+  grad.addColorStop(1, 'rgba(30,111,168,0.04)');
+
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(dense[0]));
+  for (let i = 1; i <= LAST; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
+  ctx.lineTo(xOf(LAST), PAD.top + GH);
+  ctx.lineTo(xOf(0),    PAD.top + GH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // ── メインカーブ（同じく lineTo で滑らか）──────────
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(dense[0]));
+  for (let i = 1; i <= LAST; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
+  ctx.strokeStyle = '#2e8fd1'; ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // 満潮・干潮マーカー
+  extremes.forEach(pt => {
+    const x = xOf(pt.sampleIdx), y = yOf(dense[pt.sampleIdx]);
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = pt.type === 'high' ? '#e74c3c' : '#2e8fd1'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+  });
+
+  // 現在位置ドット
+  if (nowH >= 0 && nowH < 24) {
+    const idx = Math.min(Math.round(nowH * sph), LAST);
+    const cx = xOf(idx), cy = yOf(dense[idx]);
+    ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(240,192,64,0.2)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f0c040'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+
+// ── 転潮パネル描画 ──────────────────────────────────
+function renderExtremes(extremes) {
+  const grid = document.getElementById('extremesGrid');
+  grid.innerHTML = '';
+  extremes.forEach(pt => {
+    const card = document.createElement('div');
+    card.className = `extreme-card ${pt.type}`;
+    card.innerHTML = `
+      <div class="extreme-label">${pt.type === 'high' ? '▲ 満潮' : '▽ 干潮'}</div>
+      <div class="extreme-time">${formatTime(pt.totalMinutes)}</div>
+      <div class="extreme-height">${pt.height} cm</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ── 現在潮位・転潮情報の更新 ──────────────────────
+function updateNowInfo(dense, sph, extremes, nowH) {
+  const idx   = Math.min(Math.round(nowH * sph), dense.length - 1);
+  const nowCm = Math.round(dense[idx]);
+  document.getElementById('nowHeight').textContent = nowCm;
+
+  const rising = dense[Math.min(idx + 1, dense.length - 1)] > dense[idx];
+  document.getElementById('tideTrend').textContent   = rising ? '↑ 上げ潮' : '↓ 下げ潮';
+  document.getElementById('tideTrend').style.color   = rising ? '#e74c3c'  : '#2e8fd1';
+
+  const next = extremes.find(e => e.sampleIdx > idx);
+  document.getElementById('nextTurn').textContent = next
+    ? `${formatTime(next.totalMinutes)} ${next.type === 'high' ? '満潮' : '干潮'} (${next.height}cm)`
+    : '—';
+
+  document.getElementById('nowInfo').style.display = 'flex';
+}
+
+// ── ステータス更新 ──────────────────────────────────
+function setStatus(state, msg) {
+  document.getElementById('statusDot').className  = `status-dot ${state}`;
+  document.getElementById('statusText').textContent = msg;
+}
+
+// ── チャンスタイム算出 ────────────────────────────
+// 釣果が出やすいとされる「満潮前後1時間〜下げ30%」の時間帯を返す
+function calcChanceTimes(extremes) {
+  const bands = [];
+  for (let i = 0; i < extremes.length; i++) {
+    if (extremes[i].type !== 'high') continue;
+    const high    = extremes[i];
+    const nextLow = extremes.slice(i + 1).find(e => e.type === 'low');
+    const start   = Math.max(0, high.totalMinutes - 60);
+    let end, desc;
+    if (nextLow) {
+      const dropSpan = nextLow.totalMinutes - high.totalMinutes;
+      end  = Math.min(1440, high.totalMinutes + Math.round(dropSpan * 0.3));
+      desc = `満潮${formatTime(high.totalMinutes)} 前後〜下げ30%`;
+    } else {
+      end  = Math.min(1440, high.totalMinutes + 60);
+      desc = `満潮${formatTime(high.totalMinutes)} 前後`;
+    }
+    bands.push({ start, end, desc,
+      timeRange: `${formatTime(start)} 〜 ${formatTime(end)}` });
+  }
+  return bands;
+}
+
+function renderChanceTimes(chanceBands) {
+  const card = document.getElementById('chanceCard');
+  const list = document.getElementById('chanceList');
+  if (!chanceBands.length) { card.classList.add('hidden'); return; }
+  list.innerHTML = chanceBands.map(b => `
+    <div class="chance-band">
+      <div class="chance-time">${b.timeRange}</div>
+      <div class="chance-label">${b.desc}</div>
+    </div>`).join('');
+  card.classList.remove('hidden');
+}
+
+// ── メイン ──────────────────────────────────────────
+// 釣果記録から参照するためモジュールスコープに公開
+let tideData = { dense: null, extremes: null };
+
+async function init() {
+  const now = today();
+  document.getElementById('dateLabel').textContent = formatDate(now);
+
+  const canvas = document.getElementById('tideCanvas');
+  const nowH   = now.getHours() + now.getMinutes() / 60;
+  let heights;
+
+  try {
+    setStatus('', '気象庁から潮汐データを取得中...');
+    heights = await fetchJMATide(now);
+    setStatus('ok', `気象庁 推算潮位（${DATUM_NOTE}）`);
+  } catch (err) {
+    console.warn('JMA fetch failed:', err);
+    heights = approxTide(now);
+    setStatus('warn', '近似値表示中（気象庁API取得不可 — CORS制限の可能性）');
+  }
+
+  // 24点 → 1441点（Catmull-Rom補間）
+  const dense      = catmullRomInterpolate(heights, SPH);
+  const extremes   = findExtremes(dense, SPH);
+  const chanceBands = calcChanceTimes(extremes);
+  tideData.dense      = dense;
+  tideData.extremes   = extremes;
+  tideData.rawHeights = heights; // 過去釣行の再描画用に保存
+
+  document.getElementById('loadingArea').style.display = 'none';
+  canvas.style.display = 'block';
+
+  drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands);
+  renderExtremes(extremes);
+  updateNowInfo(dense, SPH, extremes, nowH);
+  renderChanceTimes(chanceBands);
+
+  // リサイズ対応
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands), 120);
+  });
+
+  // ホバーで潮位ツールチップ
+  canvas.addEventListener('mousemove', (e) => {
+    const rect  = canvas.getBoundingClientRect();
+    const GW    = parseFloat(canvas.style.width) - 46 - 16;
+    const hoverH = Math.max(0, Math.min(24, ((e.clientX - rect.left - 46) / GW) * 24));
+    const idx    = Math.min(Math.round(hoverH * SPH), dense.length - 1);
+    canvas.title = `${formatTime(Math.round(hoverH * 60))} → ${Math.round(dense[idx])} cm`;
+  });
+}
+
+init();
+
+// ════════════════════════════════════════════════
+//  釣行セッション管理
+// ════════════════════════════════════════════════
+
+const session = {
+  active: false,
+  startTime: null,
+  catches: 0,
+  barras: 0,
+  elapsedTimer: null,
+  records: [],
+  barraRecords: [],
+  setup: {
+    tackle:      '重タックル 3号',
+    floatType:   '自作',
+    buoyancy:    '0',
+    leader:      '1.5',
+    hookType:    'グレバリ',
+    hookSize:    6,
+    bait:        'オキアミL',
+    chum:        new Set(['オキアミ3kg']),
+    wind:        '',
+    waterTemp:   '',
+  },
+};
+
+// ── チップ選択ヘルパー ────────────────────────────
+function bindChips(groupId, key, multi = false) {
+  const grp = document.getElementById(groupId);
+  if (!grp) return;
+  grp.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const val = chip.dataset.val;
+      if (multi) {
+        if (session.setup[key].has(val)) {
+          session.setup[key].delete(val);
+          chip.classList.remove('sel');
+        } else {
+          session.setup[key].add(val);
+          chip.classList.add('sel');
+        }
+      } else {
+        grp.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        session.setup[key] = val;
+      }
+    });
+  });
+}
+
+// ── ステートUIの切替 ─────────────────────────────
+function applyState() {
+  const preTripBar = document.getElementById('preTripBar');
+  const activeBar  = document.getElementById('activeBar');
+  const scoreArea  = document.getElementById('scoreArea');
+
+  if (session.active) {
+    preTripBar.classList.add('hidden');
+    activeBar.classList.remove('hidden');
+    scoreArea.classList.remove('hidden');
+  } else {
+    preTripBar.classList.remove('hidden');
+    activeBar.classList.add('hidden');
+    scoreArea.classList.add('hidden');
+  }
+}
+
+// ── スコア・経過時間の更新 ───────────────────────
+function updateScore() {
+  document.getElementById('catchCount').textContent = session.catches;
+  document.getElementById('barraCount').textContent = session.barras;
+}
+
+function updateElapsed() {
+  const mins = Math.floor((Date.now() - session.startTime) / 60000);
+  const h = Math.floor(mins / 60), m = mins % 60;
+  document.getElementById('elapsedTime').textContent =
+    h > 0 ? `${h}:${String(m).padStart(2, '0')}` : `${m}分`;
+}
+
+// ── 釣行開始 ────────────────────────────────────
+function startSession() {
+  document.getElementById('setupModal').classList.add('hidden');
+  session.active    = true;
+  session.startTime = Date.now();
+  session.catches   = 0;
+  session.barras    = 0;
+
+  const st = session.startTime;
+  const hh = String(new Date(st).getHours()).padStart(2, '0');
+  const mm = String(new Date(st).getMinutes()).padStart(2, '0');
+  document.getElementById('sessionStartLabel').textContent =
+    `釣行中  開始 ${hh}:${mm}`;
+
+  updateScore();
+  updateElapsed();
+  session.elapsedTimer = setInterval(updateElapsed, 30000);
+  applyState();
+}
+
+// ── 釣行終了 ────────────────────────────────────
+function endSession() {
+  if (!confirm('釣行を終了しますか？')) return;
+  clearInterval(session.elapsedTimer);
+  session.active = false;
+  saveCurrentSession();
+  applyState();
+  showEndScreen();
+}
+
+// ── ボタン: 釣行スタート → セットアップ表示 ────
+document.getElementById('btnStart').addEventListener('click', () => {
+  document.getElementById('setupModal').classList.remove('hidden');
+});
+document.getElementById('btnHistory').addEventListener('click', openHistoryList);
+
+// ── ボタン: セットアップを閉じる ───────────────
+document.getElementById('btnCloseSetup').addEventListener('click', () => {
+  document.getElementById('setupModal').classList.add('hidden');
+});
+
+// ── ボタン: 釣行開始確定 ───────────────────────
+document.getElementById('btnConfirm').addEventListener('click', startSession);
+
+// ── ボタン: 釣行終了 ───────────────────────────
+document.getElementById('btnEnd').addEventListener('click', endSession);
+
+// ── ボタン: 釣れた！ → 記録モーダルを開く ──────
+document.getElementById('btnCatch').addEventListener('click', openCatchModal);
+
+// ── ボタン: バラシ → 記録モーダルを開く ─────────
+document.getElementById('btnBarra').addEventListener('click', openBarraModal);
+
+function flashBtn(id) {
+  const el = document.getElementById(id);
+  el.style.transform = 'scale(.93)';
+  setTimeout(() => { el.style.transform = ''; }, 160);
+}
+
+// ── ハリ号数ステッパー ──────────────────────────
+document.getElementById('hookMinus').addEventListener('click', () => {
+  if (session.setup.hookSize > 5) {
+    session.setup.hookSize--;
+    document.getElementById('hookSizeVal').textContent = session.setup.hookSize + '号';
+  }
+});
+document.getElementById('hookPlus').addEventListener('click', () => {
+  if (session.setup.hookSize < 12) {
+    session.setup.hookSize++;
+    document.getElementById('hookSizeVal').textContent = session.setup.hookSize + '号';
+  }
+});
+
+// ── 水温テキスト入力 ───────────────────────────
+document.getElementById('waterTempInput').addEventListener('input', e => {
+  session.setup.waterTemp = e.target.value;
+});
+
+// ── チップバインド ──────────────────────────────
+bindChips('chipTackle',    'tackle');
+bindChips('chipFloatType', 'floatType');
+bindChips('chipBuoyancy',  'buoyancy');
+bindChips('chipLeader',    'leader');
+bindChips('chipHookType',  'hookType');
+bindChips('chipBait',      'bait');
+bindChips('chipChum',      'chum', true);
+bindChips('chipWind',      'wind');
+
+// ════════════════════════════════════════════════
+//  釣果記録モーダル
+// ════════════════════════════════════════════════
+
+const catchRec = {
+  species:     null,
+  sizeStr:     '',
+  disposition: null,  // 'keep' | 'release'
+  flowDir:     null,
+  flowSpeed:   null,
+  spot:        '',
+};
+
+// ── 現在の潮位・フェーズ計算 ──────────────────
+function getTideInfoNow() {
+  const { dense, extremes } = tideData;
+  if (!dense) return null;
+
+  const now  = today();
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const idx  = Math.min(Math.round(nowH * SPH), dense.length - 1);
+  const h    = Math.round(dense[idx]);
+
+  const rising = dense[Math.min(idx + 1, dense.length - 1)] > dense[idx];
+
+  // 前後の極値を探索
+  const prevHigh = [...extremes].reverse().find(e => e.type === 'high' && e.sampleIdx <= idx);
+  const nextLow  = extremes.find(e => e.type === 'low'  && e.sampleIdx >  idx);
+  const prevLow  = [...extremes].reverse().find(e => e.type === 'low'  && e.sampleIdx <= idx);
+  const nextHigh = extremes.find(e => e.type === 'high' && e.sampleIdx >  idx);
+
+  let phase = '';
+  if (!rising && prevHigh && nextLow) {
+    const pct = Math.round((idx - prevHigh.sampleIdx) / (nextLow.sampleIdx - prevHigh.sampleIdx) * 100);
+    phase = `下げ ${pct}%`;
+  } else if (rising && prevLow && nextHigh) {
+    const pct = Math.round((idx - prevLow.sampleIdx) / (nextHigh.sampleIdx - prevLow.sampleIdx) * 100);
+    phase = `上げ ${pct}%`;
+  }
+
+  return { height: h, phase, rising };
+}
+
+// ── サイズ表示の更新 ──────────────────────────
+function updateSizeDisplay() {
+  const el = document.getElementById('sizeDisplay');
+  if (!catchRec.sizeStr) {
+    el.innerHTML = `<span style="color:#2a5070">--</span><span class="s-unit"> cm</span>`;
+    el.classList.remove('has-val');
+  } else {
+    el.innerHTML = `${catchRec.sizeStr}<span class="s-unit"> cm</span>`;
+    el.classList.add('has-val');
+  }
+}
+
+// ── モーダル開閉 ──────────────────────────────
+function openCatchModal() {
+  catchRec.species     = null;
+  catchRec.sizeStr     = '';
+  catchRec.disposition = null;
+  catchRec.flowDir     = null;
+  catchRec.flowSpeed   = null;
+  catchRec.spot        = '';
+
+  document.querySelectorAll('#fishGrid .fish-chip').forEach(c => c.classList.remove('sel'));
+  document.querySelectorAll('#chipFlowDir .chip, #chipFlowSpeed .chip').forEach(c => c.classList.remove('sel'));
+  document.getElementById('btnKeepCatch').classList.remove('sel');
+  document.getElementById('btnReleaseCatch').classList.remove('sel');
+  document.getElementById('catchSpotInput').value = '';
+  updateSizeDisplay();
+
+  document.getElementById('catchModal').classList.remove('hidden');
+  document.getElementById('catchModal').scrollTop = 0;
+}
+
+function closeCatchModal() {
+  document.getElementById('catchModal').classList.add('hidden');
+}
+
+// ── 記録保存 ──────────────────────────────────
+function saveCatch() {
+  if (!catchRec.species) {
+    // 魚種未選択時は該当行をハイライト
+    document.getElementById('fishGrid').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.fish-grid').style.outline = '2px solid #e74c3c';
+    setTimeout(() => document.querySelector('.fish-grid').style.outline = '', 1200);
+    return;
+  }
+
+  const now  = today();
+  const h    = String(now.getHours()).padStart(2, '0');
+  const m    = String(now.getMinutes()).padStart(2, '0');
+  const info = getTideInfoNow();
+
+  const rec = {
+    time:        `${h}:${m}`,
+    species:     catchRec.species,
+    size:        catchRec.sizeStr ? Number(catchRec.sizeStr) : null,
+    disposition: catchRec.disposition || 'release',
+    flowDir:     catchRec.flowDir,
+    flowSpeed:   catchRec.flowSpeed,
+    spot:        document.getElementById('catchSpotInput').value.trim(),
+    tideHeight:  info ? info.height : null,
+    tidePhase:   info ? info.phase  : '',
+  };
+
+  session.records.unshift(rec);
+  session.catches++;
+  updateScore();
+  renderRecords();
+  closeCatchModal();
+  flashBtn('btnCatch');
+}
+
+// ── 釣果一覧レンダリング ──────────────────────
+function renderRecords() {
+  const list = document.getElementById('recordsList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (session.records.length === 0) {
+    list.innerHTML = '<div class="no-records">まだ釣果がありません</div>';
+    return;
+  }
+
+  session.records.forEach(rec => {
+    const el = document.createElement('div');
+    el.className = 'record-item';
+    const sizeStr  = rec.size ? `${rec.size} cm` : '-- cm';
+    const tideStr  = rec.tideHeight
+      ? `${rec.tideHeight}cm　${rec.tidePhase}`
+      : '';
+    const flowStr  = [rec.flowDir, rec.flowSpeed].filter(Boolean).join(' / ');
+    const spotStr  = rec.spot ? `📍${rec.spot}` : '';
+    const subInfo  = [spotStr, tideStr, flowStr].filter(Boolean).join('　');
+    const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
+    const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
+
+    el.innerHTML = `
+      <div class="rec-time">${rec.time}</div>
+      <div class="rec-info">
+        <div class="rec-species">${rec.species}</div>
+        ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+      </div>
+      <div class="rec-size">${sizeStr}</div>
+      <div class="rec-badge ${badgeCls}">${badgeLbl}</div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+// ── イベントリスナー (catch modal) ───────────
+document.getElementById('btnCloseCatch').addEventListener('click', closeCatchModal);
+document.getElementById('btnRecord').addEventListener('click', saveCatch);
+
+// 魚種選択（単一選択）
+document.getElementById('fishGrid').querySelectorAll('.fish-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.getElementById('fishGrid').querySelectorAll('.fish-chip')
+      .forEach(c => c.classList.remove('sel'));
+    chip.classList.add('sel');
+    catchRec.species = chip.dataset.val;
+  });
+});
+
+// テンキー
+document.getElementById('catchModal').querySelectorAll('.key-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.key;
+    if (k === 'C') {
+      catchRec.sizeStr = '';
+    } else if (k === 'B') {
+      catchRec.sizeStr = catchRec.sizeStr.slice(0, -1);
+    } else {
+      if (catchRec.sizeStr.length < 3) catchRec.sizeStr += k;
+    }
+    updateSizeDisplay();
+  });
+});
+
+// プリセットボタン
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    catchRec.sizeStr = btn.dataset.size;
+    updateSizeDisplay();
+  });
+});
+
+// キープ / リリース
+document.getElementById('btnKeepCatch').addEventListener('click', () => {
+  catchRec.disposition = 'keep';
+  document.getElementById('btnKeepCatch').classList.add('sel');
+  document.getElementById('btnReleaseCatch').classList.remove('sel');
+});
+document.getElementById('btnReleaseCatch').addEventListener('click', () => {
+  catchRec.disposition = 'release';
+  document.getElementById('btnReleaseCatch').classList.add('sel');
+  document.getElementById('btnKeepCatch').classList.remove('sel');
+});
+
+// 潮の方向・速さ（単一選択）
+function bindSingleChips(groupId, key) {
+  document.getElementById(groupId).querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById(groupId).querySelectorAll('.chip')
+        .forEach(c => c.classList.remove('sel'));
+      chip.classList.add('sel');
+      catchRec[key] = chip.dataset.val;
+    });
+  });
+}
+bindSingleChips('chipFlowDir',   'flowDir');
+bindSingleChips('chipFlowSpeed', 'flowSpeed');
+
+// ════════════════════════════════════════════════
+//  バラシ記録モーダル
+// ════════════════════════════════════════════════
+
+const FISH_LIST = [
+  '口太メジナ','尾長メジナ','クロダイ','イサキ','ヘダイ','コロダイ',
+  'フエフキ','フエダイ','オジサン','メバル','ブダイ','タカノハダイ',
+  'アイゴ','イスズミ','ウツボ','その他',
+];
+
+const barraRec = { cause:null, species:null, sizeStr:'', memo:'' };
+
+// バラシ魚種グリッド・テンキーをJSで生成（HTML重複防止）
+(function buildBarraInputs() {
+  const grid = document.getElementById('barraFishGrid');
+  FISH_LIST.forEach(name => {
+    const el = document.createElement('div');
+    el.className = 'fish-chip';
+    el.dataset.val = name;
+    el.textContent = name;
+    el.addEventListener('click', () => {
+      grid.querySelectorAll('.fish-chip').forEach(c => c.classList.remove('sel'));
+      el.classList.add('sel');
+      barraRec.species = name;
+    });
+    grid.appendChild(el);
+  });
+
+  const presets = document.getElementById('barraPresets');
+  [30,35,40,45,50,55].forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'preset-btn';
+    b.textContent = n;
+    b.addEventListener('click', () => { barraRec.sizeStr = String(n); updateBarraSizeDisplay(); });
+    presets.appendChild(b);
+  });
+
+  const kp = document.getElementById('barraKeypad');
+  [1,2,3,4,5,6,7,8,9,'C',0,'B'].forEach(k => {
+    const b = document.createElement('button');
+    b.className = 'key-btn' + (k==='C' ? ' key-clear' : k==='B' ? ' key-back' : '');
+    b.textContent = k === 'C' ? 'クリア' : k === 'B' ? '⌫' : k;
+    b.addEventListener('click', () => {
+      if (k === 'C')       barraRec.sizeStr = '';
+      else if (k === 'B')  barraRec.sizeStr = barraRec.sizeStr.slice(0,-1);
+      else if (barraRec.sizeStr.length < 3) barraRec.sizeStr += k;
+      updateBarraSizeDisplay();
+    });
+    kp.appendChild(b);
+  });
+})();
+
+function updateBarraSizeDisplay() {
+  const el = document.getElementById('barraSizeDisplay');
+  el.innerHTML = barraRec.sizeStr
+    ? `${barraRec.sizeStr}<span class="s-unit"> cm</span>`
+    : `<span style="color:#2a5070">--</span><span class="s-unit"> cm</span>`;
+}
+
+function openBarraModal() {
+  barraRec.cause = null; barraRec.species = null;
+  barraRec.sizeStr = ''; barraRec.memo = '';
+  document.querySelectorAll('#chipBarraCause .chip, #barraFishGrid .fish-chip')
+    .forEach(c => c.classList.remove('sel'));
+  updateBarraSizeDisplay();
+  document.getElementById('barraMemo').value = '';
+  document.getElementById('barraModal').classList.remove('hidden');
+}
+function closeBarraModal() { document.getElementById('barraModal').classList.add('hidden'); }
+
+function saveBarraRecord() {
+  if (!barraRec.cause) {
+    const grp = document.getElementById('chipBarraCause');
+    grp.style.outline = '2px solid #e74c3c';
+    grp.scrollIntoView({ behavior:'smooth' });
+    setTimeout(() => grp.style.outline = '', 1200);
+    return;
+  }
+  const now = today();
+  const hh  = String(now.getHours()).padStart(2,'0');
+  const mm  = String(now.getMinutes()).padStart(2,'0');
+  const info = getTideInfoNow();
+  session.barraRecords.unshift({
+    time:       `${hh}:${mm}`,
+    cause:       barraRec.cause,
+    species:     barraRec.species,
+    size:        barraRec.sizeStr ? Number(barraRec.sizeStr) : null,
+    memo:        document.getElementById('barraMemo').value.trim(),
+    tideHeight:  info ? info.height : null,
+    tidePhase:   info ? info.phase  : '',
+  });
+  session.barras++;
+  updateScore();
+  closeBarraModal();
+  flashBtn('btnBarra');
+}
+
+document.getElementById('btnCloseBarra').addEventListener('click', closeBarraModal);
+document.getElementById('btnSaveBarra').addEventListener('click', saveBarraRecord);
+
+// 原因チップ（barraRecへ紐付け）
+document.getElementById('chipBarraCause').querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.getElementById('chipBarraCause').querySelectorAll('.chip')
+      .forEach(c => c.classList.remove('sel'));
+    chip.classList.add('sel');
+    barraRec.cause = chip.dataset.val;
+  });
+});
+
+// ════════════════════════════════════════════════
+//  釣行終了画面
+// ════════════════════════════════════════════════
+
+function formatDuration(totalMins) {
+  const h = Math.floor(totalMins / 60), m = totalMins % 60;
+  return h > 0 ? `${h}時間${m}分` : `${m}分`;
+}
+
+function renderEndCatchList() {
+  const el = document.getElementById('endCatchList');
+  if (!el) return;
+  if (!session.records.length) {
+    el.innerHTML = '<div style="color:#888;text-align:center;padding:12px;">記録なし</div>';
+    return;
+  }
+  el.innerHTML = [...session.records].reverse().map(rec => {
+    const sizeStr  = rec.size ? `${rec.size} cm` : '-- cm';
+    const tideStr  = rec.tideHeight != null ? `${rec.tideHeight}cm　${rec.tidePhase}` : '';
+    const spotStr  = rec.spot ? `📍${rec.spot}` : '';
+    const subInfo  = [spotStr, tideStr].filter(Boolean).join('　');
+    const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
+    const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
+    return `<div class="rec-card">
+      <div class="rec-time">${rec.time}</div>
+      <div class="rec-info">
+        <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
+        ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showEndScreen() {
+  // 1. 先に画面を表示（canvas.parentElement.clientWidth が取れるようにする）
+  document.getElementById('endScreen').classList.remove('hidden');
+
+  // 2. 統計テキスト
+  const totalMins = session.startTime ? Math.floor((Date.now() - session.startTime) / 60000) : 0;
+  const maxSize   = session.records.filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+  document.getElementById('endCatchCount').textContent = session.catches;
+  document.getElementById('endMaxSize').textContent    = maxSize || '--';
+  document.getElementById('endDuration').textContent   = formatDuration(totalMins);
+
+  // 3. 釣果一覧
+  renderEndCatchList();
+
+  // 4. ブログサマリー（エラーでも画面が消えないよう try-catch）
+  try {
+    document.getElementById('summaryText').value = buildSummary(totalMins, maxSize);
+  } catch(e) {
+    document.getElementById('summaryText').value = '（生成エラー）';
+    console.error('buildSummary error:', e);
+  }
+
+  // 5. レイアウト確定後にキャンバス描画（二重 RAF でリフロー待ち）
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { drawSummaryGraph(); } catch(e) { console.error('drawSummaryGraph error:', e); }
+  }));
+}
+
+function drawSummaryGraph() {
+  const canvas = document.getElementById('summaryCanvas');
+  if (!tideData.dense) return;
+  if (!canvas.parentElement || canvas.parentElement.clientWidth === 0) return;
+
+  // 共通タイドグラフ描画（現在時刻ドットなし）
+  drawGraph(canvas, tideData.dense, SPH, -999, tideData.extremes);
+
+  // ── マーカーオーバーレイ（drawGraph後のスケール済みコンテキストに描画）──
+  const ctx  = canvas.getContext('2d');
+  const W    = parseFloat(canvas.style.width);
+  const H    = 240;
+  const PAD  = { top:20, right:16, bottom:38, left:46 };
+  const GW   = W - PAD.left - PAD.right;
+  const GH   = H - PAD.top  - PAD.bottom;
+  const LAST = tideData.dense.length - 1;
+  const minV = Math.min(...tideData.dense);
+  const span = Math.max(...tideData.dense) - minV || 1;
+
+  const xOf = (mins)  => PAD.left + (mins / 1440) * GW;
+  const yOf = (v)     => PAD.top  + GH - ((v - minV) / span) * GH;
+
+  function timeToMins(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  // 釣果プロット（赤丸：サイズに比例）
+  session.records.forEach(rec => {
+    if (rec.tideHeight == null) return;
+    const x  = xOf(timeToMins(rec.time));
+    const y  = yOf(rec.tideHeight);
+    const r  = rec.size ? Math.max(5, Math.min(13, rec.size / 4.5)) : 6;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle   = 'rgba(231,76,60,0.85)'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    if (rec.size && r >= 8) {
+      ctx.fillStyle   = '#fff';
+      ctx.font        = `bold ${r > 9 ? 10 : 8}px sans-serif`;
+      ctx.textAlign   = 'center';
+      ctx.fillText(rec.size, x, y + r + 10);
+    }
+  });
+
+  // バラシプロット（青×印）
+  session.barraRecords.forEach(rec => {
+    if (rec.tideHeight == null) return;
+    const x = xOf(timeToMins(rec.time));
+    const y = yOf(rec.tideHeight);
+    const s = 7;
+    ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(x-s, y-s); ctx.lineTo(x+s, y+s);
+    ctx.moveTo(x+s, y-s); ctx.lineTo(x-s, y+s); ctx.stroke();
+  });
+}
+
+function buildSummary(totalMins, maxSize) {
+  const now = today();
+  const dateStr = now.toLocaleDateString('ja-JP', {
+    year:'numeric', month:'long', day:'numeric', weekday:'long'
+  });
+  const s = session.setup;
+
+  let txt = `【館山　${dateStr}】\n`;
+
+  // 潮汐
+  if (tideData.extremes && tideData.extremes.length) {
+    const tideLines = tideData.extremes
+      .map(e => `${e.type==='high'?'満潮':'干潮'}${formatTime(e.totalMinutes)}(${e.height}cm)`)
+      .join('  ');
+    txt += `潮汐：${tideLines}\n`;
+  }
+
+  txt += `タックル：${s.tackle}  ハリス${s.leader}号  ${s.hookType}${s.hookSize}号\n`;
+  if (s.wind)      txt += `風向き：${s.wind}\n`;
+  if (s.waterTemp) txt += `水温：${s.waterTemp}℃\n`;
+  if (s.chum.size) txt += `コマセ：${[...s.chum].join('/')}\n`;
+  txt += `付け餌：${s.bait}\n`;
+
+  txt += '\n【釣果】\n';
+  const recs = [...session.records].reverse();
+  if (recs.length === 0) {
+    txt += '（釣果なし）\n';
+  } else {
+    recs.forEach(r => {
+      const sz   = r.size ? `${r.size}cm` : '--cm';
+      const ph   = r.tidePhase || '';
+      const disp = r.disposition === 'keep' ? 'キープ' : 'リリース';
+      const fl   = [r.flowDir, r.flowSpeed].filter(Boolean).join('/');
+      txt += `${r.time}  ${r.species}  ${sz}  ${ph}  ${disp}`;
+      if (fl) txt += `  潮:${fl}`;
+      if (r.spot) txt += `  📍${r.spot}`;
+      txt += '\n';
+    });
+  }
+
+  if (session.barraRecords.length) {
+    txt += '\n【バラシ】\n';
+    [...session.barraRecords].reverse().forEach(r => {
+      txt += `${r.time}  ${r.cause}`;
+      if (r.species) txt += `  推定:${r.species}`;
+      if (r.size)    txt += `  約${r.size}cm`;
+      if (r.memo)    txt += `  [${r.memo}]`;
+      txt += '\n';
+    });
+  }
+
+  txt += `\n釣果：${session.catches}尾 / バラシ：${session.barras}回`;
+  if (maxSize) txt += ` / 最大：${maxSize}cm`;
+  txt += `\n釣行時間：${formatDuration(totalMins)}\n`;
+  txt += '\n#フカセ釣り #館山 #メジナ #潮録';
+  return txt;
+}
+
+document.getElementById('btnBackHome').addEventListener('click', () => {
+  document.getElementById('endScreen').classList.add('hidden');
+  session.records     = [];
+  session.barraRecords = [];
+  session.catches     = 0;
+  session.barras      = 0;
+  renderRecords();
+  updateScore();
+  applyState();
+});
+
+document.getElementById('btnCopySummary').addEventListener('click', async () => {
+  const text = document.getElementById('summaryText').value;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('btnCopySummary');
+    btn.textContent = '✅ コピーしました！';
+    setTimeout(() => btn.textContent = '📋 クリップボードにコピー', 2000);
+  } catch {
+    document.getElementById('summaryText').select();
+  }
+});
+
+// ════════════════════════════════════════════════
+//  安全確認モーダル
+// ════════════════════════════════════════════════
+
+function buildSafetyMessage(endTime) {
+  const now = today();
+  const hh  = String(now.getHours()).padStart(2,'0');
+  const mm  = String(now.getMinutes()).padStart(2,'0');
+  const end = endTime ? `予定終了：${endTime}` : '予定終了：未定';
+  return `【釣行開始のお知らせ】🎣\n\n場所：館山（千葉県）\n開始：${hh}:${mm}\n${end}\n\n無事に終わったら連絡します。\n安全に気をつけて楽しんできます！\n\n(潮録アプリより)`;
+}
+
+function updateSafetyPreview() {
+  const endTime = document.getElementById('safetyEndTime').value;
+  document.getElementById('safetyPreview').textContent = buildSafetyMessage(endTime);
+}
+
+document.getElementById('btnOpenSafety').addEventListener('click', () => {
+  const now = today();
+  // デフォルト終了時刻を開始から5時間後に設定
+  const def = new Date(now.getTime() + 5 * 3600000);
+  document.getElementById('safetyEndTime').value =
+    `${String(def.getHours()).padStart(2,'0')}:${String(def.getMinutes()).padStart(2,'0')}`;
+  updateSafetyPreview();
+  document.getElementById('safetyModal').classList.remove('hidden');
+});
+document.getElementById('btnCloseSafety').addEventListener('click', () => {
+  document.getElementById('safetyModal').classList.add('hidden');
+});
+document.getElementById('safetyEndTime').addEventListener('input', updateSafetyPreview);
+
+document.getElementById('btnSendLine').addEventListener('click', () => {
+  const msg = buildSafetyMessage(document.getElementById('safetyEndTime').value);
+  window.open(`https://line.me/R/msg/text/?${encodeURIComponent(msg)}`, '_blank');
+});
+document.getElementById('btnSendSMS').addEventListener('click', () => {
+  const msg = buildSafetyMessage(document.getElementById('safetyEndTime').value);
+  window.location.href = `sms:?body=${encodeURIComponent(msg)}`;
+});
+
+// ════════════════════════════════════════════════
+//  過去釣行 — localStorage 管理
+// ════════════════════════════════════════════════
+
+const STORAGE_KEY = 'shioroku_trips';
+
+function loadTrips() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function saveCurrentSession() {
+  if (!session.startTime) return;
+  const trip = {
+    id:          session.startTime,
+    startTime:   session.startTime,
+    endTime:     Date.now(),
+    location:    '館山（千葉県）',
+    setup: {
+      ...session.setup,
+      chum: [...session.setup.chum],
+    },
+    catches:      session.catches,
+    barras:       session.barras,
+    records:      session.records.slice(),
+    barraRecords: session.barraRecords.slice(),
+    extremes:     tideData.extremes || [],
+    tideHeights:  tideData.rawHeights || [],
+  };
+  const trips = loadTrips().filter(t => t.id !== trip.id);
+  trips.unshift(trip);
+  if (trips.length > 60) trips.length = 60;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); }
+  catch(e) { console.warn('localStorage save failed:', e); }
+}
+
+function deleteTrip(id) {
+  const trips = loadTrips().filter(t => t.id !== id);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); }
+  catch(e) {}
+}
+
+// ── 過去釣行 一覧 ────────────────────────────────
+function openHistoryList() {
+  renderHistoryList();
+  document.getElementById('historyList').classList.remove('hidden');
+}
+
+function renderHistoryList() {
+  const trips = loadTrips();
+  const body  = document.getElementById('historyListBody');
+
+  if (!trips.length) {
+    body.innerHTML = `<div class="history-empty">
+      まだ釣行記録がありません。<br>
+      釣行終了時に自動で保存されます。
+    </div>`;
+    return;
+  }
+
+  body.innerHTML = trips.map((t, i) => {
+    const d       = new Date(t.startTime);
+    const dateStr = d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+    const startHH = String(d.getHours()).padStart(2,'0');
+    const startMM = String(d.getMinutes()).padStart(2,'0');
+    const maxSize = (t.records||[]).filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+    const dur     = formatDuration(Math.round((t.endTime - t.startTime) / 60000));
+    return `<div class="history-item" data-idx="${i}">
+      <div class="history-date">${dateStr}　${startHH}:${startMM}〜</div>
+      <div class="history-stats">
+        <span class="history-stat-catch">🐟 ${t.catches}尾</span>
+        ${maxSize ? `<span class="history-stat-size">最大 ${maxSize}cm</span>` : ''}
+        <span class="history-stat-dur">⏱ ${dur}</span>
+      </div>
+      <button class="btn-delete-trip" data-id="${t.id}" title="削除">🗑</button>
+      <div class="history-arrow">›</div>
+    </div>`;
+  }).join('');
+
+  body.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-delete-trip')) return;
+      openHistoryDetail(trips[+el.dataset.idx]);
+    });
+  });
+  body.querySelectorAll('.btn-delete-trip').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!confirm('この釣行記録を削除しますか？')) return;
+      deleteTrip(+btn.dataset.id);
+      renderHistoryList();
+    });
+  });
+}
+
+document.getElementById('btnCloseHistory').addEventListener('click', () => {
+  document.getElementById('historyList').classList.add('hidden');
+});
+
+// ── 過去釣行 詳細 ────────────────────────────────
+function openHistoryDetail(trip) {
+  const d        = new Date(trip.startTime);
+  const dateStr  = d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+  const totalMins = Math.round((trip.endTime - trip.startTime) / 60000);
+  const maxSize   = (trip.records||[]).filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+
+  document.getElementById('historyDetailTitle').textContent = dateStr;
+
+  const recHtml = (trip.records||[]).length
+    ? [...trip.records].map(rec => {
+        const sizeStr  = rec.size ? `${rec.size} cm` : '-- cm';
+        const tideStr  = rec.tideHeight != null ? `${rec.tideHeight}cm　${rec.tidePhase}` : '';
+        const spotStr  = rec.spot ? `📍${rec.spot}` : '';
+        const subInfo  = [spotStr, tideStr].filter(Boolean).join('　');
+        const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
+        const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
+        return `<div class="rec-card">
+          <div class="rec-time">${rec.time}</div>
+          <div class="rec-info">
+            <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
+            ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="color:#888;text-align:center;padding:12px;">記録なし</div>';
+
+  document.getElementById('historyDetailBody').innerHTML = `
+    <div class="end-stat-row">
+      <div class="end-stat-cell">
+        <div class="end-stat-num" style="color:#e74c3c">${trip.catches}</div>
+        <div class="end-stat-lbl">釣果</div>
+      </div>
+      <div class="end-stat-cell">
+        <div class="end-stat-num" style="color:#7ecef0">${maxSize || '--'}</div>
+        <div class="end-stat-lbl">最大 cm</div>
+      </div>
+      <div class="end-stat-cell">
+        <div class="end-stat-num" style="color:#f0c040;font-size:20px">${formatDuration(totalMins)}</div>
+        <div class="end-stat-lbl">釣行時間</div>
+      </div>
+    </div>
+    <div style="border-radius:8px;overflow:hidden;">
+      <canvas id="historyCanvas"></canvas>
+    </div>
+    <div class="graph-legend">
+      <span><span class="legend-dot"></span>釣果（円の大きさ＝サイズ）</span>
+      <span><span class="legend-x">✕</span>バラシ</span>
+    </div>
+    <div class="records-hdr">釣果一覧</div>
+    <div class="records-list" style="margin-bottom:16px;">${recHtml}</div>
+    <div class="sec-lbl" style="margin-bottom:8px;">ブログ用サマリー</div>
+    <textarea class="summary-textarea" id="historySummaryText" readonly>${buildTripSummary(trip, totalMins, maxSize)}</textarea>
+    <button class="btn-copy" id="btnCopyHistorySummary">📋 クリップボードにコピー</button>
+  `;
+
+  document.getElementById('btnCopyHistorySummary').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(document.getElementById('historySummaryText').value);
+      const btn = document.getElementById('btnCopyHistorySummary');
+      btn.textContent = '✅ コピーしました！';
+      setTimeout(() => btn.textContent = '📋 クリップボードにコピー', 2000);
+    } catch { document.getElementById('historySummaryText').select(); }
+  });
+
+  document.getElementById('historyDetail').classList.remove('hidden');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { drawHistoryGraph(trip); } catch(e) { console.error(e); }
+  }));
+}
+
+document.getElementById('btnBackToList').addEventListener('click', () => {
+  document.getElementById('historyDetail').classList.add('hidden');
+});
+
+// ── 過去釣行グラフ描画 ────────────────────────────
+function drawHistoryGraph(trip) {
+  const canvas = document.getElementById('historyCanvas');
+  if (!canvas || !canvas.parentElement || canvas.parentElement.clientWidth === 0) return;
+  if (!(trip.tideHeights||[]).length) return;
+
+  const dense    = catmullRomInterpolate(trip.tideHeights, SPH);
+  const extremes = (trip.extremes||[]).length ? trip.extremes : findExtremes(dense, SPH);
+  drawGraph(canvas, dense, SPH, -999, extremes);
+
+  const ctx  = canvas.getContext('2d');
+  const W    = parseFloat(canvas.style.width);
+  const PAD  = { top:20, right:16, bottom:38, left:46 };
+  const GW   = W - PAD.left - PAD.right;
+  const GH   = 240 - PAD.top - PAD.bottom;
+  const minV = Math.min(...dense);
+  const span = Math.max(...dense) - minV || 1;
+  const xOf  = mins => PAD.left + (mins / 1440) * GW;
+  const yOf  = v    => PAD.top  + GH - ((v - minV) / span) * GH;
+  const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+
+  (trip.records||[]).forEach(rec => {
+    if (rec.tideHeight == null) return;
+    const x = xOf(toMins(rec.time)), y = yOf(rec.tideHeight);
+    const r = rec.size ? Math.max(5, Math.min(13, rec.size / 4.5)) : 6;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(231,76,60,0.85)'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    if (rec.size && r >= 8) {
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${r > 9 ? 10 : 8}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(rec.size, x, y + r + 10);
+    }
+  });
+  (trip.barraRecords||[]).forEach(rec => {
+    if (rec.tideHeight == null) return;
+    const x = xOf(toMins(rec.time)), y = yOf(rec.tideHeight), s = 7;
+    ctx.strokeStyle = '#3498db'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(x-s,y-s); ctx.lineTo(x+s,y+s);
+    ctx.moveTo(x+s,y-s); ctx.lineTo(x-s,y+s); ctx.stroke();
+  });
+}
+
+// ── 過去釣行サマリーテキスト生成 ───────────────────
+function buildTripSummary(trip, totalMins, maxSize) {
+  const d = new Date(trip.startTime);
+  const dateStr = d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+  const s = trip.setup || {};
+  const chumArr = Array.isArray(s.chum) ? s.chum : [];
+
+  let txt = `【館山　${dateStr}】\n`;
+
+  if ((trip.extremes||[]).length) {
+    txt += `潮汐：${trip.extremes
+      .map(e => `${e.type==='high'?'満潮':'干潮'}${formatTime(e.totalMinutes)}(${e.height}cm)`)
+      .join('  ')}\n`;
+  }
+
+  if (s.tackle)   txt += `タックル：${s.tackle}  ハリス${s.leader||''}号  ${s.hookType||''}${s.hookSize||''}号\n`;
+  if (s.wind)      txt += `風向き：${s.wind}\n`;
+  if (s.waterTemp) txt += `水温：${s.waterTemp}℃\n`;
+  if (chumArr.length) txt += `コマセ：${chumArr.join('/')}\n`;
+  if (s.bait)      txt += `付け餌：${s.bait}\n`;
+
+  txt += '\n【釣果】\n';
+  const recs = trip.records || [];
+  if (!recs.length) {
+    txt += '（釣果なし）\n';
+  } else {
+    recs.forEach(r => {
+      const sz   = r.size ? `${r.size}cm` : '--cm';
+      const ph   = r.tidePhase || '';
+      const disp = r.disposition === 'keep' ? 'キープ' : 'リリース';
+      const fl   = [r.flowDir, r.flowSpeed].filter(Boolean).join('/');
+      txt += `${r.time}  ${r.species}  ${sz}  ${ph}  ${disp}`;
+      if (fl) txt += `  潮:${fl}`;
+      if (r.spot) txt += `  📍${r.spot}`;
+      txt += '\n';
+    });
+  }
+
+  if ((trip.barraRecords||[]).length) {
+    txt += '\n【バラシ】\n';
+    trip.barraRecords.forEach(r => {
+      txt += `${r.time}  ${r.cause}`;
+      if (r.species) txt += `  推定:${r.species}`;
+      if (r.size)    txt += `  約${r.size}cm`;
+      if (r.memo)    txt += `  [${r.memo}]`;
+      txt += '\n';
+    });
+  }
+
+  txt += `\n釣果：${trip.catches}尾 / バラシ：${trip.barras}回`;
+  if (maxSize) txt += ` / 最大：${maxSize}cm`;
+  txt += `\n釣行時間：${formatDuration(totalMins)}\n`;
+  txt += '\n#フカセ釣り #館山 #メジナ #潮録';
+  return txt;
+}
+</script>
+</body>
+</html>
