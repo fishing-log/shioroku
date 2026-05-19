@@ -1486,10 +1486,45 @@ main { padding-bottom: 100px; }
 
 const STATION    = 'TK';
 const DATUM_NOTE = 'T.P.（東京湾平均海面）基準';
-const TP_OFFSET  = 100; // 館山 CDL → T.P. 変換値（cm）
 const SPH        = 60; // Catmull-Rom補間: 1時間あたりのサンプル数（= 1分解像度）
+const TATEYAMA   = { lat: 34.99, lon: 139.86 };
 
 function today() { return new Date(); }
+
+// ── 日の出・日の入り計算（Spencer式 EoT + 標準時角公式）─────
+// 戻り値: { rise, set } いずれも JST の小数時刻（例: 5.5 = 5:30）
+function calcSunTimes(date, lat = TATEYAMA.lat, lon = TATEYAMA.lon) {
+  const rad = Math.PI / 180;
+  const TZ  = 9; // JST = UTC+9
+
+  // 年初からの日数（1月1日=1）
+  const start = new Date(date.getFullYear(), 0, 0);
+  const doy   = Math.round((date - start) / 86400000); // day of year
+
+  // Spencer の B 角（ラジアン）
+  const B = (2 * Math.PI / 365) * (doy - 81);
+
+  // 均時差（分）Spencer (1971)
+  const eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+
+  // 太陽赤緯（度）
+  const dec = 23.45 * Math.sin(B);
+
+  // 太陽の時角（度）― 大気屈折・太陽半径補正 -0.833°
+  const cosH = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec * rad))
+             / (Math.cos(lat * rad) * Math.cos(dec * rad));
+  if (cosH < -1 || cosH > 1) return null; // 白夜・極夜
+
+  const H = Math.acos(cosH) / rad; // 時角（度）
+
+  // 太陽正中時刻（JST, 時）
+  const solarNoon = 12 - (lon - TZ * 15) / 15 - eot / 60;
+
+  return {
+    rise: solarNoon - H / 15,
+    set:  solarNoon + H / 15,
+  };
+}
 
 function dayOfYear(d) {
   return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
@@ -1596,7 +1631,7 @@ function findExtremes(dense, sph) {
 
 // ── Canvas グラフ描画 ──────────────────────────────
 // dense: 1441点の補間済み配列, sph: SPH, extremes: 事前計算済み
-function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = []) {
+function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTimes = null) {
   const dpr = window.devicePixelRatio || 1;
   const W   = canvas.parentElement.clientWidth - 40;
   const H   = 240;
@@ -1619,10 +1654,57 @@ function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = []) {
   // サンプルインデックス→x座標（0→0:00, 1440→24:00）
   const xOf = (idx) => PAD.left + (idx / LAST) * GW;
   const yOf = (v)   => PAD.top  + GH - ((v - minV) / span) * GH;
+  const xOfH = (h)  => PAD.left + (h / 24) * GW; // 時間→x
 
   // 背景
   ctx.fillStyle = '#091828';
   ctx.fillRect(0, 0, W, H);
+
+  // ── 日の出・日の入り帯 ──────────────────────────────
+  if (sunTimes) {
+    const { rise, set } = sunTimes;
+    const xRise = xOfH(Math.max(0, rise));
+    const xSet  = xOfH(Math.min(24, set));
+
+    // 夜帯（0:00〜日の出）濃紺
+    ctx.fillStyle = 'rgba(4,10,28,0.60)';
+    ctx.fillRect(PAD.left, PAD.top, xRise - PAD.left, GH);
+
+    // 昼帯（日の出〜日の入り）薄オレンジ
+    ctx.fillStyle = 'rgba(255,150,40,0.07)';
+    ctx.fillRect(xRise, PAD.top, xSet - xRise, GH);
+
+    // 夜帯（日の入り〜24:00）濃紺
+    ctx.fillStyle = 'rgba(4,10,28,0.60)';
+    ctx.fillRect(xSet, PAD.top, PAD.left + GW - xSet, GH);
+
+    // 境界線（オレンジ破線）
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = 1;
+    [{ x: xRise, label: '☀ ' + formatTime(Math.round(rise * 60)), align: 'left'  },
+     { x: xSet,  label: formatTime(Math.round(set  * 60)) + ' ☽', align: 'right' }]
+    .forEach(({ x, label, align }) => {
+      ctx.strokeStyle = 'rgba(255,150,40,0.55)';
+      ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, PAD.top + GH); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // ラベル背景
+      ctx.font = `bold 9px 'Hiragino Kaku Gothic ProN', sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const lx = align === 'left' ? x + 3 : x - tw - 3;
+      const ly = PAD.top + 2;
+      ctx.fillStyle = 'rgba(4,10,28,0.65)';
+      ctx.fillRect(lx - 1, ly, tw + 2, 11);
+
+      // ラベルテキスト
+      ctx.fillStyle = 'rgba(255,180,80,0.92)';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, lx, ly + 9);
+
+      ctx.setLineDash([3, 3]); // 次のループ用に戻す
+    });
+    ctx.setLineDash([]);
+  }
 
   // チャンスタイム帯（金色ハイライト）
   chanceBands.forEach(band => {
@@ -1811,19 +1893,21 @@ async function init() {
     setStatus('warn', '近似値表示中（気象庁API取得不可 — CORS制限の可能性）');
   }
 
-  // 24点 → 1441点（Catmull-Rom補間）、CDL → T.P. 変換
-  const denseRaw    = catmullRomInterpolate(heights, SPH);
-  const dense       = denseRaw.map(v => v + TP_OFFSET);
+  // 24点 → 1441点（Catmull-Rom補間）
+  // 気象庁データはすでに T.P. 基準で提供されるため変換不要
+  const dense       = catmullRomInterpolate(heights, SPH);
   const extremes    = findExtremes(dense, SPH);
   const chanceBands = calcChanceTimes(extremes);
+  const sunTimes    = calcSunTimes(now);
   tideData.dense      = dense;
   tideData.extremes   = extremes;
-  tideData.rawHeights = heights.map(v => v + TP_OFFSET); // 過去釣行の再描画用に保存
+  tideData.rawHeights = heights.slice(); // 過去釣行の再描画用に保存
+  tideData.sunTimes   = sunTimes;
 
   document.getElementById('loadingArea').style.display = 'none';
   canvas.style.display = 'block';
 
-  drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands);
+  drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands, sunTimes);
   renderExtremes(extremes);
   updateNowInfo(dense, SPH, extremes, nowH);
   renderChanceTimes(chanceBands);
@@ -1832,7 +1916,7 @@ async function init() {
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands), 120);
+    resizeTimer = setTimeout(() => drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands, sunTimes), 120);
   });
 
   // ホバーで潮位ツールチップ
@@ -2417,7 +2501,7 @@ function drawSummaryGraph() {
   if (!canvas.parentElement || canvas.parentElement.clientWidth === 0) return;
 
   // 共通タイドグラフ描画（現在時刻ドットなし）
-  drawGraph(canvas, tideData.dense, SPH, -999, tideData.extremes);
+  drawGraph(canvas, tideData.dense, SPH, -999, tideData.extremes, [], tideData.sunTimes || null);
 
   // ── マーカーオーバーレイ（drawGraph後のスケール済みコンテキストに描画）──
   const ctx  = canvas.getContext('2d');
@@ -2793,7 +2877,8 @@ function drawHistoryGraph(trip) {
 
   const dense    = catmullRomInterpolate(trip.tideHeights, SPH);
   const extremes = (trip.extremes||[]).length ? trip.extremes : findExtremes(dense, SPH);
-  drawGraph(canvas, dense, SPH, -999, extremes);
+  const tripSunTimes = calcSunTimes(new Date(trip.startTime));
+  drawGraph(canvas, dense, SPH, -999, extremes, [], tripSunTimes);
 
   const ctx  = canvas.getContext('2d');
   const W    = parseFloat(canvas.style.width);
