@@ -1485,7 +1485,8 @@ main { padding-bottom: 100px; }
 'use strict';
 
 const STATION    = 'TK';
-const DATUM_NOTE = '潮位基準面（CDL）上cm';
+const DATUM_NOTE = 'T.P.（東京湾平均海面）基準';
+const TP_OFFSET  = 100; // 館山 CDL → T.P. 変換値（cm）
 const SPH        = 60; // Catmull-Rom補間: 1時間あたりのサンプル数（= 1分解像度）
 
 function today() { return new Date(); }
@@ -1644,8 +1645,14 @@ function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = []) {
     ctx.strokeStyle = '#1a3555'; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + GW, y); ctx.stroke();
     ctx.fillStyle = '#3d7ca8'; ctx.textAlign = 'right';
-    ctx.fillText(Math.round(v) + 'cm', PAD.left - 4, y + 3.5);
+    ctx.fillText(Math.round(v), PAD.left - 4, y + 3.5);
   });
+
+  // 縦軸単位ラベル（T.P. cm）
+  ctx.font = `9px 'Hiragino Kaku Gothic ProN', sans-serif`;
+  ctx.fillStyle = '#2d5a78'; ctx.textAlign = 'left';
+  ctx.fillText('T.P.', 2, PAD.top - 4);
+  ctx.fillText('cm',   2, PAD.top + 6);
 
   // 垂直グリッド（3時間ごと）
   for (let h = 0; h <= 24; h += 3) {
@@ -1804,13 +1811,14 @@ async function init() {
     setStatus('warn', '近似値表示中（気象庁API取得不可 — CORS制限の可能性）');
   }
 
-  // 24点 → 1441点（Catmull-Rom補間）
-  const dense      = catmullRomInterpolate(heights, SPH);
-  const extremes   = findExtremes(dense, SPH);
+  // 24点 → 1441点（Catmull-Rom補間）、CDL → T.P. 変換
+  const denseRaw    = catmullRomInterpolate(heights, SPH);
+  const dense       = denseRaw.map(v => v + TP_OFFSET);
+  const extremes    = findExtremes(dense, SPH);
   const chanceBands = calcChanceTimes(extremes);
   tideData.dense      = dense;
   tideData.extremes   = extremes;
-  tideData.rawHeights = heights; // 過去釣行の再描画用に保存
+  tideData.rawHeights = heights.map(v => v + TP_OFFSET); // 過去釣行の再描画用に保存
 
   document.getElementById('loadingArea').style.display = 'none';
   canvas.style.display = 'block';
