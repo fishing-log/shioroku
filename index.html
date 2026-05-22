@@ -264,15 +264,39 @@ main {
   50%      { opacity:.5; transform:scale(1.3); }
 }
 
-/* ── BOTTOM ACTION BAR ────────────────────────── */
-main { padding-bottom: 100px; }
-.action-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, #060f1c 75%, transparent);
-  z-index: 100;
+/* ── BOTTOM ACTION BAR (legacy, hidden) ────────── */
+main { padding-bottom: 150px; }
+
+/* ── BOTTOM NAV ───────────────────────────────── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: stretch;
+  background: #060f1c;
+  border-top: 1px solid #1b3a58;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 300;
 }
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 8px 4px; gap: 3px;
+  background: none; border: none;
+  font-family: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: #3d6a88; font-size: 10px;
+}
+.nav-tab .nav-icon { font-size: 22px; line-height: 1; }
+.nav-tab.active { color: #2e8fd1; }
+.nav-tab:nth-child(4) { color: #27ae60; font-size: 10px; }
+.nav-tab:nth-child(4).active { color: #27ae60; }
+.session-bar {
+  position: fixed; bottom: calc(60px + env(safe-area-inset-bottom)); left: 0; right: 0;
+  padding: 10px 16px;
+  background: linear-gradient(to top, #060f1c 80%, transparent);
+  z-index: 200; display: none;
+}
+.session-bar.visible { display: block; }
+
 .btn-start {
   display: block;
   width: 100%;
@@ -965,6 +989,74 @@ main { padding-bottom: 100px; }
 }
 
 .hidden { display: none !important; }
+
+/* ── MY PAGE ──────────────────────────────────── */
+.mypage-section { margin-bottom: 24px; }
+.mypage-section-title {
+  font-size: 15px; font-weight: 700; color: #7ecef0;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid #1b3a58;
+}
+.preset-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; margin-bottom: 8px;
+  background: #091828; border-radius: 12px;
+  border: 1px solid #1b3a58;
+}
+.preset-item-info { flex: 1; }
+.preset-item-name { font-size: 15px; font-weight: 600; color: #e8f4fb; margin-bottom: 2px; }
+.preset-item-detail { font-size: 12px; color: #5a8aa8; }
+.btn-preset-select {
+  padding: 6px 14px; font-size: 13px; font-family: inherit;
+  background: #1a4a6a; color: #7ecef0;
+  border: 1px solid #2e8fd1; border-radius: 8px; cursor: pointer;
+}
+.btn-preset-delete {
+  padding: 6px 10px; font-size: 13px; font-family: inherit;
+  background: none; color: #e74c3c;
+  border: 1px solid #6a1a1a; border-radius: 8px; cursor: pointer;
+}
+.btn-preset-add {
+  display: block; width: 100%; padding: 12px;
+  font-size: 14px; font-family: inherit; font-weight: 600;
+  background: none; color: #2e8fd1;
+  border: 1.5px dashed #2e8fd1; border-radius: 10px; cursor: pointer;
+  margin-top: 8px;
+}
+.preset-form {
+  background: #040d18; border: 1px solid #1b3a58;
+  border-radius: 12px; padding: 14px; margin-bottom: 8px;
+}
+.preset-form-row { margin-bottom: 10px; }
+.preset-form label { display: block; font-size: 12px; color: #5a8aa8; margin-bottom: 4px; }
+.preset-form input, .preset-form select {
+  width: 100%; padding: 8px 12px; box-sizing: border-box;
+  background: #091828; border: 1.5px solid #253e56;
+  border-radius: 8px; color: #e8f4fb; font-size: 14px; font-family: inherit;
+}
+.btn-preset-save {
+  width: 100%; padding: 10px; font-size: 14px; font-family: inherit;
+  background: #1a8449; color: #fff; border: none; border-radius: 8px; cursor: pointer;
+  margin-top: 4px;
+}
+.record-item-mypage {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; margin-bottom: 8px;
+  background: #091828; border-radius: 12px;
+  border: 1px solid #1b3a58;
+}
+.record-fish-photo {
+  width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+}
+.record-fish-placeholder {
+  width: 56px; height: 56px; border-radius: 8px;
+  background: #0d2030; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.record-fish-info { flex: 1; }
+.record-fish-species { font-size: 16px; font-weight: 700; color: #e8f4fb; }
+.record-fish-size { font-size: 22px; font-weight: 700; color: #f0c040; }
+.record-fish-date { font-size: 12px; color: #5a8aa8; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -1317,20 +1409,50 @@ main { padding-bottom: 100px; }
   <div class="catch-body" id="historyDetailBody"></div>
 </div>
 
-<!-- ── ボトムアクションバー ─────────────────────── -->
-<div class="action-bar" id="actionBar">
-  <div id="preTripBar">
-    <button class="btn-history" id="btnHistory">📖 過去の釣行を見る</button>
-    <button class="btn-start"   id="btnStart">🎣 釣行スタート</button>
-  </div>
-  <div id="activeBar" class="hidden">
-    <button class="btn-end" id="btnEnd">■ 釣行を終了する</button>
-    <div class="catch-row">
-      <button class="btn-catch" id="btnCatch">🐟 釣れた！</button>
-      <button class="btn-barra" id="btnBarra">💨 バラシ</button>
-    </div>
+<!-- ── セッションバー（釣行中のみ表示） ─────────────── -->
+<div class="session-bar" id="sessionBar">
+  <button class="btn-end" id="btnEnd">■ 釣行を終了する</button>
+  <div class="catch-row">
+    <button class="btn-catch" id="btnCatch">🐟 釣れた！</button>
+    <button class="btn-barra" id="btnBarra">💨 バラシ</button>
   </div>
 </div>
+
+<!-- ── ボトムナビ ─────────────────────────────────── -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-tab active" id="navHome" onclick="navigateTo('home')">
+    <span class="nav-icon">🏠</span>
+    <span>ホーム</span>
+  </button>
+  <button class="nav-tab" id="navMypage" onclick="navigateTo('mypage')">
+    <span class="nav-icon">👤</span>
+    <span>マイページ</span>
+  </button>
+  <button class="nav-tab" id="navHistory" onclick="navigateTo('history')">
+    <span class="nav-icon">📋</span>
+    <span>過去の釣果</span>
+  </button>
+  <button class="nav-tab" id="navStart" onclick="navigateTo('start')">
+    <span class="nav-icon">🎣</span>
+    <span>釣行スタート</span>
+  </button>
+</nav>
+
+<!-- ── マイページ ────────────────────────────────── -->
+<div class="catch-modal hidden" id="myPage" style="z-index:350;">
+  <div class="catch-hdr">
+    <button class="btn-close-catch" id="btnCloseMyPage" onclick="navigateTo('home')">✕</button>
+    <span class="catch-title">マイページ</span>
+    <div style="width:44px"></div>
+  </div>
+  <div class="catch-body" id="myPageBody" style="padding-bottom:24px;">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- 隠しファイルインプット（履歴写真追加用） -->
+<input type="file" accept="image/*" id="historyPhotoInput" style="display:none">
+<input type="file" accept="image/*" id="historyTripPhotoInput" style="display:none">
 
 <!-- ── セットアップモーダル ──────────────────────── -->
 <div class="modal-overlay hidden" id="setupModal">
@@ -1982,21 +2104,56 @@ function bindChips(groupId, key, multi = false) {
   });
 }
 
+// ── ナビゲーション ────────────────────────────────
+let currentNav = 'home';
+
+function navigateTo(page) {
+  if (page === 'history') {
+    openHistoryList();
+    // keep home active visually
+    return;
+  }
+  if (page === 'start') {
+    if (!session.active) {
+      document.getElementById('setupModal').classList.remove('hidden');
+      fetchGPS();
+    }
+    return;
+  }
+  if (page === 'mypage') {
+    currentNav = 'mypage';
+    document.getElementById('myPage').classList.remove('hidden');
+    renderMyPage();
+    updateNavTabs();
+    return;
+  }
+  if (page === 'home') {
+    currentNav = 'home';
+    document.getElementById('myPage').classList.add('hidden');
+    updateNavTabs();
+    return;
+  }
+}
+
+function updateNavTabs() {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  if (currentNav === 'home') document.getElementById('navHome').classList.add('active');
+  if (currentNav === 'mypage') document.getElementById('navMypage').classList.add('active');
+}
+
 // ── ステートUIの切替 ─────────────────────────────
 function applyState() {
-  const preTripBar = document.getElementById('preTripBar');
-  const activeBar  = document.getElementById('activeBar');
+  const sessionBar = document.getElementById('sessionBar');
   const scoreArea  = document.getElementById('scoreArea');
 
   if (session.active) {
-    preTripBar.classList.add('hidden');
-    activeBar.classList.remove('hidden');
+    sessionBar.classList.add('visible');
     scoreArea.classList.remove('hidden');
   } else {
-    preTripBar.classList.remove('hidden');
-    activeBar.classList.add('hidden');
+    sessionBar.classList.remove('visible');
     scoreArea.classList.add('hidden');
   }
+  updateNavTabs();
 }
 
 // ── スコア・経過時間の更新 ───────────────────────
@@ -2041,12 +2198,6 @@ function endSession() {
   applyState();
   showEndScreen();
 }
-
-// ── ボタン: 釣行スタート → セットアップ表示 ────
-document.getElementById('btnStart').addEventListener('click', () => {
-  document.getElementById('setupModal').classList.remove('hidden');
-});
-document.getElementById('btnHistory').addEventListener('click', openHistoryList);
 
 // ── ボタン: セットアップを閉じる ───────────────
 document.getElementById('btnCloseSetup').addEventListener('click', () => {
@@ -2787,84 +2938,6 @@ document.getElementById('btnCloseHistory').addEventListener('click', () => {
   document.getElementById('historyList').classList.add('hidden');
 });
 
-// ── 過去釣行 詳細 ────────────────────────────────
-function openHistoryDetail(trip) {
-  const d        = new Date(trip.startTime);
-  const dateStr  = d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-  const totalMins = Math.round((trip.endTime - trip.startTime) / 60000);
-  const maxSize   = (trip.records||[]).filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
-
-  document.getElementById('historyDetailTitle').textContent = dateStr;
-
-  const recHtml = (trip.records||[]).length
-    ? [...trip.records].map(rec => {
-        const sizeStr  = rec.size ? `${rec.size} cm` : '-- cm';
-        const tideStr  = rec.tideHeight != null ? `${rec.tideHeight}cm　${rec.tidePhase}` : '';
-        const spotStr  = rec.spot ? `📍${rec.spot}` : '';
-        const subInfo  = [spotStr, tideStr].filter(Boolean).join('　');
-        const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
-        const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
-        return `<div class="rec-card">
-          <div class="rec-card-row">
-            <div class="rec-time">${rec.time}</div>
-            <div class="rec-info">
-              <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
-              ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
-            </div>
-          </div>
-          ${rec.photo ? `<img src="${rec.photo}" class="rec-photo-full" alt="釣果写真">` : ''}
-        </div>`;
-      }).join('')
-    : '<div style="color:#888;text-align:center;padding:12px;">記録なし</div>';
-
-  document.getElementById('historyDetailBody').innerHTML = `
-    <div class="end-stat-row">
-      <div class="end-stat-cell">
-        <div class="end-stat-num" style="color:#e74c3c">${trip.catches}</div>
-        <div class="end-stat-lbl">釣果</div>
-      </div>
-      <div class="end-stat-cell">
-        <div class="end-stat-num" style="color:#7ecef0">${maxSize || '--'}</div>
-        <div class="end-stat-lbl">最大 cm</div>
-      </div>
-      <div class="end-stat-cell">
-        <div class="end-stat-num" style="color:#f0c040;font-size:20px">${formatDuration(totalMins)}</div>
-        <div class="end-stat-lbl">釣行時間</div>
-      </div>
-    </div>
-    <div style="border-radius:8px;overflow:hidden;">
-      <canvas id="historyCanvas"></canvas>
-    </div>
-    <div class="graph-legend">
-      <span><span class="legend-dot"></span>釣果（円の大きさ＝サイズ）</span>
-      <span><span class="legend-x">✕</span>バラシ</span>
-    </div>
-    <div class="records-hdr">釣果一覧</div>
-    <div class="records-list" style="margin-bottom:16px;">${recHtml}</div>
-    ${trip.tripPhoto ? `
-    <div class="sec-lbl" style="margin-bottom:8px;">集合写真</div>
-    <img src="${trip.tripPhoto}" class="trip-photo-preview" alt="集合写真">
-    ` : ''}
-    <div class="sec-lbl" style="margin-bottom:8px;">ブログ用サマリー</div>
-    <textarea class="summary-textarea" id="historySummaryText" readonly>${buildTripSummary(trip, totalMins, maxSize)}</textarea>
-    <button class="btn-copy" id="btnCopyHistorySummary">📋 クリップボードにコピー</button>
-  `;
-
-  document.getElementById('btnCopyHistorySummary').addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(document.getElementById('historySummaryText').value);
-      const btn = document.getElementById('btnCopyHistorySummary');
-      btn.textContent = '✅ コピーしました！';
-      setTimeout(() => btn.textContent = '📋 クリップボードにコピー', 2000);
-    } catch { document.getElementById('historySummaryText').select(); }
-  });
-
-  document.getElementById('historyDetail').classList.remove('hidden');
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    try { drawHistoryGraph(trip); } catch(e) { console.error(e); }
-  }));
-}
-
 document.getElementById('btnBackToList').addEventListener('click', () => {
   document.getElementById('historyDetail').classList.add('hidden');
 });
@@ -3130,16 +3203,469 @@ async function fetchGPS() {
   );
 }
 
-// 釣行スタートボタン押下時にGPS取得を開始
-const _origBtnStart = document.getElementById('btnStart');
-_origBtnStart.addEventListener('click', fetchGPS);
-
 // 安全確認モーダルを開いたときも最新状態を表示
-const _origOpenSafety = document.getElementById('btnOpenSafety');
-_origOpenSafety.addEventListener('click', () => {
-  // GPS取得中でなければ（未取得なら）再取得
+document.getElementById('btnOpenSafety').addEventListener('click', () => {
   if (gpsState.lat === null) fetchGPS();
 });
+
+// ════════════════════════════════════════════════
+//  マイページ — プリセット管理
+// ════════════════════════════════════════════════
+
+const TACKLE_KEY = 'shioroku_tackle_presets';
+const FLOAT_KEY  = 'shioroku_float_presets';
+const CHUM_KEY   = 'shioroku_chum_presets';
+
+function loadJSON(key, defaults) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null') || defaults; }
+  catch { return defaults; }
+}
+function saveJSON(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+}
+
+const DEFAULT_TACKLE = [
+  { name:'重タックル', rod:'磯竿3号 5.3m', reel:'BB-X テクニウム', line:'道糸3号' },
+  { name:'軽タックル', rod:'磯竿1.25号 5.3m', reel:'BB-X ハイパーフォース', line:'道糸1.75号' },
+];
+const DEFAULT_FLOAT  = [];
+const DEFAULT_CHUM   = [];
+
+function getTacklePresets()  { return loadJSON(TACKLE_KEY, DEFAULT_TACKLE); }
+function getFloatPresets()   { return loadJSON(FLOAT_KEY,  DEFAULT_FLOAT); }
+function getChumPresets()    { return loadJSON(CHUM_KEY,   DEFAULT_CHUM); }
+
+// ── 自己記録算出 ─────────────────────────────────
+function calcPersonalRecords() {
+  const trips = loadTrips();
+  const map = {};
+  trips.forEach(trip => {
+    (trip.records || []).forEach(rec => {
+      if (!rec.species || !rec.size) return;
+      const sp = rec.species;
+      const date = new Date(trip.startTime).toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
+      if (!map[sp] || rec.size > map[sp].size) {
+        map[sp] = { size: rec.size, date, photo: rec.photo || null };
+      }
+    });
+  });
+  return map;
+}
+
+// ── マイページ描画 ────────────────────────────────
+function renderMyPage() {
+  const body = document.getElementById('myPageBody');
+  body.innerHTML = '';
+
+  // ─ タックルプリセット ─
+  body.appendChild(renderTackleSection());
+  // ─ ウキプリセット ─
+  body.appendChild(renderFloatSection());
+  // ─ コマセプリセット ─
+  body.appendChild(renderChumSection());
+  // ─ 自己記録 ─
+  body.appendChild(renderRecordsSection());
+}
+
+function renderTackleSection() {
+  const sec = document.createElement('div');
+  sec.className = 'mypage-section';
+  sec.innerHTML = '<div class="mypage-section-title">🎣 タックルプリセット</div>';
+  const listEl = document.createElement('div');
+  listEl.id = 'tacklePresetList';
+  sec.appendChild(listEl);
+
+  function refresh() {
+    const presets = getTacklePresets();
+    listEl.innerHTML = presets.map((p, i) => `
+      <div class="preset-item">
+        <div class="preset-item-info">
+          <div class="preset-item-name">${escHtml(p.name)}</div>
+          <div class="preset-item-detail">${escHtml(p.rod)} / ${escHtml(p.reel)} / ${escHtml(p.line)}</div>
+        </div>
+        <button class="btn-preset-select" data-i="${i}">選択</button>
+        <button class="btn-preset-delete" data-i="${i}">🗑</button>
+      </div>`).join('');
+    listEl.querySelectorAll('.btn-preset-select').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = getTacklePresets()[+btn.dataset.i];
+        if (p) {
+          session.setup.tackle = p.name;
+          // sync chip UI if setup modal visible
+          syncChipUI('chipTackle', p.name);
+          alert(`タックル「${p.name}」を選択しました`);
+        }
+      });
+    });
+    listEl.querySelectorAll('.btn-preset-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('削除しますか？')) return;
+        const arr = getTacklePresets();
+        arr.splice(+btn.dataset.i, 1);
+        saveJSON(TACKLE_KEY, arr);
+        refresh();
+      });
+    });
+  }
+  refresh();
+
+  // 追加フォーム
+  let formEl = null;
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-preset-add';
+  addBtn.textContent = '＋ 追加';
+  addBtn.addEventListener('click', () => {
+    if (formEl) { formEl.remove(); formEl = null; return; }
+    formEl = document.createElement('div');
+    formEl.className = 'preset-form';
+    formEl.innerHTML = `
+      <div class="preset-form-row"><label>プリセット名</label><input id="tf_name" placeholder="例: 磯竿3号セット"></div>
+      <div class="preset-form-row"><label>ロッド</label><input id="tf_rod" placeholder="例: 磯竿3号 5.3m"></div>
+      <div class="preset-form-row"><label>リール</label><input id="tf_reel" placeholder="例: BB-X テクニウム"></div>
+      <div class="preset-form-row"><label>道糸</label><input id="tf_line" placeholder="例: 道糸3号"></div>
+      <button class="btn-preset-save" id="tf_save">保存</button>`;
+    sec.insertBefore(formEl, addBtn);
+    formEl.querySelector('#tf_save').addEventListener('click', () => {
+      const name = formEl.querySelector('#tf_name').value.trim();
+      const rod  = formEl.querySelector('#tf_rod').value.trim();
+      const reel = formEl.querySelector('#tf_reel').value.trim();
+      const line = formEl.querySelector('#tf_line').value.trim();
+      if (!name) { alert('名前を入力してください'); return; }
+      const arr = getTacklePresets();
+      arr.push({ name, rod, reel, line });
+      saveJSON(TACKLE_KEY, arr);
+      formEl.remove(); formEl = null;
+      refresh();
+    });
+  });
+  sec.appendChild(addBtn);
+  return sec;
+}
+
+function renderFloatSection() {
+  const sec = document.createElement('div');
+  sec.className = 'mypage-section';
+  sec.innerHTML = '<div class="mypage-section-title">🎈 ウキプリセット</div>';
+  const listEl = document.createElement('div');
+  sec.appendChild(listEl);
+
+  function refresh() {
+    const presets = getFloatPresets();
+    listEl.innerHTML = presets.length ? presets.map((p, i) => `
+      <div class="preset-item">
+        <div class="preset-item-info">
+          <div class="preset-item-name">${escHtml(p.name)}</div>
+          <div class="preset-item-detail">${escHtml(p.type)} / 浮力: ${escHtml(p.buoyancy)}</div>
+        </div>
+        <button class="btn-preset-delete" data-i="${i}">🗑</button>
+      </div>`).join('') : '<div style="color:#3d6a88;font-size:14px;padding:8px 0;">まだ登録がありません</div>';
+    listEl.querySelectorAll('.btn-preset-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('削除しますか？')) return;
+        const arr = getFloatPresets();
+        arr.splice(+btn.dataset.i, 1);
+        saveJSON(FLOAT_KEY, arr);
+        refresh();
+      });
+    });
+  }
+  refresh();
+
+  let formEl = null;
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-preset-add';
+  addBtn.textContent = '＋ 追加';
+  addBtn.addEventListener('click', () => {
+    if (formEl) { formEl.remove(); formEl = null; return; }
+    formEl = document.createElement('div');
+    formEl.className = 'preset-form';
+    formEl.innerHTML = `
+      <div class="preset-form-row"><label>名前</label><input id="ff_name" placeholder="例: 自作000"></div>
+      <div class="preset-form-row"><label>種類</label>
+        <select id="ff_type"><option value="棒">棒ウキ</option><option value="円錐">円錐ウキ</option><option value="自作">自作</option></select>
+      </div>
+      <div class="preset-form-row"><label>浮力</label><input id="ff_buoy" placeholder="例: 0, 2B, 3B"></div>
+      <button class="btn-preset-save" id="ff_save">保存</button>`;
+    sec.insertBefore(formEl, addBtn);
+    formEl.querySelector('#ff_save').addEventListener('click', () => {
+      const name    = formEl.querySelector('#ff_name').value.trim();
+      const type    = formEl.querySelector('#ff_type').value;
+      const buoyancy = formEl.querySelector('#ff_buoy').value.trim();
+      if (!name) { alert('名前を入力してください'); return; }
+      const arr = getFloatPresets();
+      arr.push({ name, type, buoyancy });
+      saveJSON(FLOAT_KEY, arr);
+      formEl.remove(); formEl = null;
+      refresh();
+    });
+  });
+  sec.appendChild(addBtn);
+  return sec;
+}
+
+function renderChumSection() {
+  const sec = document.createElement('div');
+  sec.className = 'mypage-section';
+  sec.innerHTML = '<div class="mypage-section-title">🪣 コマセ組み合わせ</div>';
+  const listEl = document.createElement('div');
+  sec.appendChild(listEl);
+
+  function refresh() {
+    const presets = getChumPresets();
+    listEl.innerHTML = presets.length ? presets.map((p, i) => `
+      <div class="preset-item">
+        <div class="preset-item-info">
+          <div class="preset-item-name">${escHtml(p.name)}</div>
+          <div class="preset-item-detail">${(p.ingredients||[]).map(escHtml).join(' / ')}</div>
+        </div>
+        <button class="btn-preset-delete" data-i="${i}">🗑</button>
+      </div>`).join('') : '<div style="color:#3d6a88;font-size:14px;padding:8px 0;">まだ登録がありません</div>';
+    listEl.querySelectorAll('.btn-preset-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!confirm('削除しますか？')) return;
+        const arr = getChumPresets();
+        arr.splice(+btn.dataset.i, 1);
+        saveJSON(CHUM_KEY, arr);
+        refresh();
+      });
+    });
+  }
+  refresh();
+
+  let formEl = null;
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-preset-add';
+  addBtn.textContent = '＋ 追加';
+  addBtn.addEventListener('click', () => {
+    if (formEl) { formEl.remove(); formEl = null; return; }
+    formEl = document.createElement('div');
+    formEl.className = 'preset-form';
+    formEl.innerHTML = `
+      <div class="preset-form-row"><label>名前</label><input id="cf_name" placeholder="例: 秋の磯セット"></div>
+      <div class="preset-form-row"><label>材料（カンマ区切り）</label><input id="cf_ing" placeholder="例: オキアミ3kg,V9,グレパン"></div>
+      <button class="btn-preset-save" id="cf_save">保存</button>`;
+    sec.insertBefore(formEl, addBtn);
+    formEl.querySelector('#cf_save').addEventListener('click', () => {
+      const name = formEl.querySelector('#cf_name').value.trim();
+      const ing  = formEl.querySelector('#cf_ing').value.split(',').map(s => s.trim()).filter(Boolean);
+      if (!name) { alert('名前を入力してください'); return; }
+      const arr = getChumPresets();
+      arr.push({ name, ingredients: ing });
+      saveJSON(CHUM_KEY, arr);
+      formEl.remove(); formEl = null;
+      refresh();
+    });
+  });
+  sec.appendChild(addBtn);
+  return sec;
+}
+
+function renderRecordsSection() {
+  const sec = document.createElement('div');
+  sec.className = 'mypage-section';
+  sec.innerHTML = '<div class="mypage-section-title">🏆 自己記録（魚種別最大サイズ）</div>';
+  const records = calcPersonalRecords();
+  const keys = Object.keys(records);
+  if (!keys.length) {
+    sec.innerHTML += '<div style="color:#3d6a88;font-size:14px;padding:8px 0;">まだ釣果記録がありません</div>';
+    return sec;
+  }
+  // Sort by size desc
+  keys.sort((a, b) => records[b].size - records[a].size);
+  const listHtml = keys.map(sp => {
+    const r = records[sp];
+    const thumb = r.photo
+      ? `<img src="${r.photo}" class="record-fish-photo" alt="釣果写真">`
+      : `<div class="record-fish-placeholder">🐟</div>`;
+    return `<div class="record-item-mypage">
+      ${thumb}
+      <div class="record-fish-info">
+        <div class="record-fish-species">${escHtml(sp)}</div>
+        <div class="record-fish-size">${r.size} cm</div>
+        <div class="record-fish-date">${r.date}</div>
+      </div>
+    </div>`;
+  }).join('');
+  sec.innerHTML += listHtml;
+  return sec;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function syncChipUI(groupId, val) {
+  const grp = document.getElementById(groupId);
+  if (!grp) return;
+  grp.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('sel', c.dataset.val === val);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  過去釣行 — 後付け写真追加
+// ════════════════════════════════════════════════
+
+let _histPhotoCallback = null;
+let _histTripPhotoCallback = null;
+
+document.getElementById('historyPhotoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const dataURL = await compressImage(file);
+  if (_histPhotoCallback) _histPhotoCallback(dataURL);
+  e.target.value = '';
+});
+
+document.getElementById('historyTripPhotoInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const dataURL = await compressImage(file);
+  if (_histTripPhotoCallback) _histTripPhotoCallback(dataURL);
+  e.target.value = '';
+});
+
+// ── 過去釣行 詳細（写真追加対応版）────────────────
+function openHistoryDetail(trip) {
+  const d        = new Date(trip.startTime);
+  const dateStr  = d.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+  const totalMins = Math.round((trip.endTime - trip.startTime) / 60000);
+  const maxSize   = (trip.records||[]).filter(r => r.size).reduce((mx,r) => Math.max(mx,r.size), 0);
+
+  document.getElementById('historyDetailTitle').textContent = dateStr;
+
+  function buildDetailHTML(currentTrip) {
+    const recHtml = (currentTrip.records||[]).length
+      ? [...currentTrip.records].map((rec, ri) => {
+          const sizeStr  = rec.size ? `${rec.size} cm` : '-- cm';
+          const tideStr  = rec.tideHeight != null ? `${rec.tideHeight}cm　${rec.tidePhase}` : '';
+          const spotStr  = rec.spot ? `📍${rec.spot}` : '';
+          const subInfo  = [spotStr, tideStr].filter(Boolean).join('　');
+          const badgeCls = rec.disposition === 'keep' ? 'badge-keep' : 'badge-release';
+          const badgeLbl = rec.disposition === 'keep' ? '🧊' : '🌊';
+          const photoPart = rec.photo
+            ? `<img src="${rec.photo}" class="rec-photo-full" alt="釣果写真">
+               <button class="btn-photo-delete btn-hist-photo-change" data-ri="${ri}" style="margin-top:4px;">📷 変更</button>`
+            : `<button class="btn-hist-photo-add" data-ri="${ri}" style="display:block;width:100%;padding:8px;margin-top:6px;font-size:13px;font-family:inherit;background:none;color:#2e8fd1;border:1px dashed #2e8fd1;border-radius:8px;cursor:pointer;">📷 写真を追加</button>`;
+          return `<div class="rec-card" data-ri="${ri}">
+            <div class="rec-card-row">
+              <div class="rec-time">${rec.time}</div>
+              <div class="rec-info">
+                <div class="rec-species">${rec.species}　${sizeStr}<span class="badge ${badgeCls}" style="margin-left:6px;padding:3px 7px;border-radius:8px;">${badgeLbl}</span></div>
+                ${subInfo ? `<div class="rec-tide">${subInfo}</div>` : ''}
+              </div>
+            </div>
+            ${photoPart}
+          </div>`;
+        }).join('')
+      : '<div style="color:#888;text-align:center;padding:12px;">記録なし</div>';
+
+    const tripPhotoSection = currentTrip.tripPhoto
+      ? `<div class="sec-lbl" style="margin-bottom:8px;">集合写真</div>
+         <img src="${currentTrip.tripPhoto}" class="trip-photo-preview" alt="集合写真">
+         <button class="btn-photo-delete" id="btnHistChangeTripPhoto" style="margin-bottom:8px;">📷 集合写真を変更</button>`
+      : `<button class="btn-trip-photo" id="btnHistAddTripPhoto">📷 集合写真を追加</button>`;
+
+    return `
+      <div class="end-stat-row">
+        <div class="end-stat-cell">
+          <div class="end-stat-num" style="color:#e74c3c">${currentTrip.catches}</div>
+          <div class="end-stat-lbl">釣果</div>
+        </div>
+        <div class="end-stat-cell">
+          <div class="end-stat-num" style="color:#7ecef0">${maxSize || '--'}</div>
+          <div class="end-stat-lbl">最大 cm</div>
+        </div>
+        <div class="end-stat-cell">
+          <div class="end-stat-num" style="color:#f0c040;font-size:20px">${formatDuration(totalMins)}</div>
+          <div class="end-stat-lbl">釣行時間</div>
+        </div>
+      </div>
+      <div style="border-radius:8px;overflow:hidden;">
+        <canvas id="historyCanvas"></canvas>
+      </div>
+      <div class="graph-legend">
+        <span><span class="legend-dot"></span>釣果（円の大きさ＝サイズ）</span>
+        <span><span class="legend-x">✕</span>バラシ</span>
+      </div>
+      <div class="records-hdr">釣果一覧</div>
+      <div class="records-list" id="histDetailRecList" style="margin-bottom:16px;">${recHtml}</div>
+      <div class="sec-lbl" style="margin-bottom:8px;margin-top:8px;">集合写真</div>
+      <div id="histTripPhotoArea">${tripPhotoSection}</div>
+      <div class="sec-lbl" style="margin-bottom:8px;margin-top:16px;">ブログ用サマリー</div>
+      <textarea class="summary-textarea" id="historySummaryText" readonly>${buildTripSummary(currentTrip, totalMins, maxSize)}</textarea>
+      <button class="btn-copy" id="btnCopyHistorySummary">📋 クリップボードにコピー</button>
+    `;
+  }
+
+  function rerender() {
+    // Reload trip from storage by id
+    const trips = loadTrips();
+    const fresh = trips.find(t => t.id === trip.id) || trip;
+    Object.assign(trip, fresh);
+    document.getElementById('historyDetailBody').innerHTML = buildDetailHTML(trip);
+    bindDetailEvents();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      try { drawHistoryGraph(trip); } catch(e) { console.error(e); }
+    }));
+  }
+
+  function bindDetailEvents() {
+    const body = document.getElementById('historyDetailBody');
+
+    // Copy summary
+    const copyBtn = document.getElementById('btnCopyHistorySummary');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(document.getElementById('historySummaryText').value);
+          copyBtn.textContent = '✅ コピーしました！';
+          setTimeout(() => copyBtn.textContent = '📋 クリップボードにコピー', 2000);
+        } catch { document.getElementById('historySummaryText').select(); }
+      });
+    }
+
+    // 写真追加ボタン（各釣果）
+    body.querySelectorAll('.btn-hist-photo-add, .btn-hist-photo-change').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ri = +btn.dataset.ri;
+        _histPhotoCallback = (dataURL) => {
+          const trips = loadTrips();
+          const t = trips.find(t2 => t2.id === trip.id);
+          if (t && t.records && t.records[ri] !== undefined) {
+            // find matching record by reverse index (records stored newest-first)
+            t.records[ri].photo = dataURL;
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); } catch(e) {}
+          }
+          rerender();
+        };
+        document.getElementById('historyPhotoInput').click();
+      });
+    });
+
+    // 集合写真追加/変更
+    const addTripBtn    = document.getElementById('btnHistAddTripPhoto');
+    const changeTripBtn = document.getElementById('btnHistChangeTripPhoto');
+    const tripPhotoHandler = () => {
+      _histTripPhotoCallback = (dataURL) => {
+        const trips = loadTrips();
+        const t = trips.find(t2 => t2.id === trip.id);
+        if (t) { t.tripPhoto = dataURL; try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); } catch(e) {} }
+        rerender();
+      };
+      document.getElementById('historyTripPhotoInput').click();
+    };
+    if (addTripBtn)    addTripBtn.addEventListener('click', tripPhotoHandler);
+    if (changeTripBtn) changeTripBtn.addEventListener('click', tripPhotoHandler);
+  }
+
+  document.getElementById('historyDetailBody').innerHTML = buildDetailHTML(trip);
+  bindDetailEvents();
+  document.getElementById('historyDetail').classList.remove('hidden');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { drawHistoryGraph(trip); } catch(e) { console.error(e); }
+  }));
+}
 </script>
 </body>
 </html>
