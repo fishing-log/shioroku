@@ -267,6 +267,31 @@ main {
 /* ── BOTTOM ACTION BAR (legacy, hidden) ────────── */
 main { padding-bottom: 160px; }
 
+/* ── SETUP PAGE（モーダルではなくページとして表示）── */
+#setupModal {
+  display: block;
+  padding: 0 0 calc(100px + env(safe-area-inset-bottom));
+}
+#setupModal.hidden { display: none; }
+#setupModal .setup-sheet {
+  max-height: none;
+  border-radius: 14px;
+  margin: 16px;
+  animation: none;
+}
+#setupModal .sheet-handle { display: none; }
+
+/* セッション中インジケーター */
+.session-nav-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #27ae60;
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* ── BOTTOM NAV ───────────────────────────────── */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -1497,8 +1522,8 @@ main { padding-bottom: 160px; }
     <span>過去の釣果</span>
   </button>
   <button class="nav-tab" id="navStart" onclick="navigateTo('start')">
-    <span class="nav-icon">🎣</span>
-    <span>釣行スタート</span>
+    <span class="nav-icon">🎣<span class="session-nav-dot hidden" id="sessionNavDot"></span></span>
+    <span id="navStartLabel">釣行スタート</span>
   </button>
 </nav>
 
@@ -1519,12 +1544,12 @@ main { padding-bottom: 160px; }
 <input type="file" accept="image/*" id="historyTripPhotoInput" style="display:none">
 
 <!-- ── セットアップモーダル ──────────────────────── -->
-<div class="modal-overlay hidden" id="setupModal">
+<div class="hidden" id="setupModal">
   <div class="setup-sheet">
-    <div class="sheet-handle"></div>
     <div class="sheet-hdr">
+      <button class="btn-close-sheet" id="btnCloseSetup" style="font-size:15px;color:#5a8aa8;">← 戻る</button>
       <span class="sheet-title">仕掛け設定</span>
-      <button class="btn-close-sheet" id="btnCloseSetup">✕</button>
+      <div style="width:60px"></div>
     </div>
 
     <div class="sheet-body">
@@ -2215,21 +2240,43 @@ function bindChips(groupId, key, multi = false) {
 // ── ナビゲーション ────────────────────────────────
 let currentNav = 'home';
 
+function showSetupPage() {
+  document.querySelector('main').style.display = 'none';
+  document.getElementById('myPage').classList.add('hidden');
+  document.getElementById('historyList').classList.add('hidden');
+  document.getElementById('setupModal').classList.remove('hidden');
+  applyMyPagePresetsToSetup();
+  fetchGPS();
+  currentNav = 'start';
+  updateNavTabs();
+}
+
+function hideSetupPage() {
+  document.getElementById('setupModal').classList.add('hidden');
+  document.querySelector('main').style.display = '';
+}
+
 function navigateTo(page) {
-  if (page === 'history') {
-    openHistoryList();
-    // keep home active visually
+  if (page === 'start') {
+    if (session.active) {
+      // 釣行中はホームへ戻る（セッションコントロールがある）
+      hideSetupPage();
+      document.getElementById('myPage').classList.add('hidden');
+      document.getElementById('historyList').classList.add('hidden');
+      currentNav = 'home';
+      updateNavTabs();
+      return;
+    }
+    showSetupPage();
     return;
   }
-  if (page === 'start') {
-    if (!session.active) {
-      document.getElementById('setupModal').classList.remove('hidden');
-      applyMyPagePresetsToSetup();
-      fetchGPS();
-    }
+  if (page === 'history') {
+    hideSetupPage();
+    openHistoryList();
     return;
   }
   if (page === 'mypage') {
+    hideSetupPage();
     currentNav = 'mypage';
     document.getElementById('myPage').classList.remove('hidden');
     renderMyPage();
@@ -2237,8 +2284,10 @@ function navigateTo(page) {
     return;
   }
   if (page === 'home') {
+    hideSetupPage();
     currentNav = 'home';
     document.getElementById('myPage').classList.add('hidden');
+    document.getElementById('historyList').classList.add('hidden');
     updateNavTabs();
     return;
   }
@@ -2246,8 +2295,23 @@ function navigateTo(page) {
 
 function updateNavTabs() {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  if (currentNav === 'home') document.getElementById('navHome').classList.add('active');
-  if (currentNav === 'mypage') document.getElementById('navMypage').classList.add('active');
+  if (currentNav === 'home')    document.getElementById('navHome').classList.add('active');
+  if (currentNav === 'mypage')  document.getElementById('navMypage').classList.add('active');
+  if (currentNav === 'history') document.getElementById('navHistory').classList.add('active');
+  if (currentNav === 'start')   document.getElementById('navStart').classList.add('active');
+
+  // 釣行中インジケーター
+  const dot   = document.getElementById('sessionNavDot');
+  const label = document.getElementById('navStartLabel');
+  if (dot && label) {
+    if (session.active) {
+      dot.classList.remove('hidden');
+      label.textContent = '釣行中に戻る';
+    } else {
+      dot.classList.add('hidden');
+      label.textContent = '釣行スタート';
+    }
+  }
 }
 
 // ── ステートUIの切替 ─────────────────────────────
@@ -2280,7 +2344,8 @@ function updateElapsed() {
 
 // ── 釣行開始 ────────────────────────────────────
 function startSession() {
-  document.getElementById('setupModal').classList.add('hidden');
+  hideSetupPage();          // セットアップページを閉じてmainを復元
+  currentNav = 'home';
   session.active    = true;
   session.startTime = Date.now();
   session.catches   = 0;
@@ -2311,7 +2376,9 @@ function endSession() {
 
 // ── ボタン: セットアップを閉じる ───────────────
 document.getElementById('btnCloseSetup').addEventListener('click', () => {
-  document.getElementById('setupModal').classList.add('hidden');
+  hideSetupPage();
+  currentNav = 'home';
+  updateNavTabs();
 });
 
 // ── ボタン: 釣行開始確定 ───────────────────────
@@ -3079,6 +3146,7 @@ document.getElementById('btnOpenSafety').addEventListener('click', () => {
     `${String(def.getHours()).padStart(2,'0')}:${String(def.getMinutes()).padStart(2,'0')}`;
   updateSafetyPreview();
   document.getElementById('safetyModal').classList.remove('hidden');
+  if (gpsState.lat === null) fetchGPS();
 });
 document.getElementById('btnCloseSafety').addEventListener('click', () => {
   document.getElementById('safetyModal').classList.add('hidden');
@@ -3472,10 +3540,6 @@ async function fetchGPS() {
   );
 }
 
-// 安全確認モーダルを開いたときも最新状態を表示
-document.getElementById('btnOpenSafety').addEventListener('click', () => {
-  if (gpsState.lat === null) fetchGPS();
-});
 
 // ════════════════════════════════════════════════
 //  マイページ — プリセット管理
