@@ -145,58 +145,47 @@ main {
 .status-dot.warn { background: #e67e22; }
 .status-dot.err  { background: #c0392b; }
 
-/* ── CANVAS ──────────────────────────────────────── */
-#tideCanvas {
-  display: block;
-  border-radius: 8px;
-  width: 100%;
-  cursor: crosshair;
-}
-
 /* ── EXTREMES GRID ───────────────────────────────── */
 .extremes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
 }
 .extreme-card {
   background: #091828;
   border: 1px solid #1b3a58;
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 8px;
+  padding: 8px 10px;
 }
 .extreme-card.high { border-left: 3px solid #e74c3c; }
 .extreme-card.low  { border-left: 3px solid #2e86c1; }
 .extreme-label {
-  font-size: 12px;
-  letter-spacing: 1px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
   color: #5a8aa8;
-  margin-bottom: 6px;
-  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 .extreme-time {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
   color: #e8f4fb;
   line-height: 1;
 }
 .extreme-height {
-  font-size: 14px;
+  font-size: 12px;
   color: #7ecef0;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
-/* ── NOW INFO ──────────────────────────────────── */
+/* ── NOW INFO (compact) ──────────────────────────── */
 .now-info {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 14px 18px;
-  background: #091828;
-  border: 1px solid #1b3a58;
-  border-radius: 10px;
-  margin-bottom: 16px;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 .now-label {
   font-size: 12px;
@@ -1150,6 +1139,58 @@ main { padding-bottom: 160px; }
   background: #0d2035; color: #5a8aa8; margin-left: 6px;
 }
 
+/* ── 今日のコンパクト潮情報カード ─────────────────── */
+.today-compact-card { padding: 12px 14px; }
+.today-compact-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.today-compact-status {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: #5a8aa8;
+}
+.today-mid-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.today-badge-group { display: flex; align-items: center; }
+.today-height-group { display: flex; align-items: center; gap: 8px; }
+
+/* ── カレンダー日別詳細ページ ────────────────────── */
+#calDayPage {
+  position: fixed;
+  inset: 0;
+  background: #060f1c;
+  z-index: 550;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+#calDayPage.hidden { display: none; }
+.cal-day-page-hdr {
+  position: sticky;
+  top: 0;
+  background: #060f1c;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #1a3a5c;
+  gap: 8px;
+}
+.cal-day-back-btn {
+  background: none;
+  border: none;
+  color: #5ab0d8;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cal-day-title-block { flex: 1; text-align: center; min-width: 0; }
+
 /* ── 月間カレンダー ───────────────────────────────── */
 #calendarSection { padding-bottom: 4px; }
 .cal-nav {
@@ -1203,19 +1244,9 @@ main { padding-bottom: 160px; }
 .cal-tide-badge.若潮 { background: #2a1a10; color: #d08040; }
 .cal-stars { font-size: 9px; color: #e0c030; letter-spacing: -1px; line-height: 1; }
 
-/* ── カレンダー日別詳細モーダル ─────────────────── */
-#calDayModal .sheet {
-  max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  border-radius: 20px 20px 0 0;
-}
-.cal-day-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px 12px; border-bottom: 1px solid #1a3a5c;
-}
-.cal-day-title-wrap { flex: 1; text-align: center; }
-.cal-day-title { font-size: 18px; font-weight: 700; color: #e0f0ff; }
-.cal-day-meta  { font-size: 12px; color: #5a8aa8; margin-top: 3px; }
-.cal-day-moon-lg { font-size: 32px; }
+.cal-day-title { font-size: 17px; font-weight: 700; color: #e0f0ff; }
+.cal-day-meta  { font-size: 11px; color: #5a8aa8; margin-top: 2px; }
+.cal-day-moon-lg { font-size: 28px; flex-shrink: 0; }
 .cal-day-body { padding: 12px 14px 28px; }
 .cal-info-row { display: flex; gap: 8px; margin-bottom: 10px; }
 .cal-info-card {
@@ -1268,45 +1299,7 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
 </header>
 
 <main>
-  <div class="card">
-    <div class="location-row">
-      <span class="location-name" id="locationName">📍 館山（千葉県）</span>
-      <span class="date-label" id="dateLabel">—</span>
-    </div>
-    <div class="status-bar">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">潮汐データを読み込み中...</span>
-    </div>
-
-    <div class="now-info" id="nowInfo" style="display:none;">
-      <div>
-        <div class="now-label">現在の潮位</div>
-        <div>
-          <span class="now-height" id="nowHeight">—</span>
-          <span class="now-unit"> cm</span>
-        </div>
-      </div>
-      <div class="tide-trend" id="tideTrend" title="潮汐の向き"></div>
-      <div>
-        <div class="now-label">次の転潮</div>
-        <div id="nextTurn" style="font-size:13px; color:#7ecef0; margin-top:4px;">—</div>
-      </div>
-    </div>
-
-    <div class="loading-area" id="loadingArea">データ取得中...</div>
-    <canvas id="tideCanvas" style="display:none;"></canvas>
-
-    <div class="extremes-grid" id="extremesGrid"></div>
-  </div>
-
-  <!-- ── チャンスタイムカード ── -->
-  <div class="card hidden" id="chanceCard">
-    <div style="font-size:15px;font-weight:700;color:#f0c040;letter-spacing:2px;margin-bottom:10px;">⭐ おすすめチャンスタイム</div>
-    <div id="chanceList"></div>
-    <div style="font-size:12px;color:#3d6a88;margin-top:6px;line-height:1.5;">満潮前後1時間〜下げ潮30%（グラフ上の金色帯）</div>
-  </div>
-
-  <!-- ── 月間カレンダー ─────────────────────────────── -->
+  <!-- ── 月間カレンダー（メイン表示）────────────────── -->
   <div class="card" id="calendarSection">
     <div class="cal-nav">
       <button class="cal-nav-btn" id="calPrevBtn">‹</button>
@@ -1320,6 +1313,36 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
       <div class="cal-weekday">土</div>
     </div>
     <div id="calGrid" class="cal-grid"></div>
+  </div>
+
+  <!-- ── 今日のコンパクト潮情報 ───────────────────── -->
+  <div class="card today-compact-card" id="todayCompactCard">
+    <div class="today-compact-header">
+      <span class="date-label" id="dateLabel">—</span>
+      <div class="today-compact-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText"></span>
+      </div>
+    </div>
+    <div class="today-mid-row">
+      <div class="today-badge-group">
+        <span id="compactTideTypeBadge" class="cal-tide-badge" style="font-size:11px;padding:3px 8px;">—</span>
+        <span id="compactMoonIconHome" style="font-size:20px;margin-left:8px;vertical-align:middle;"></span>
+      </div>
+      <div id="nowInfo" class="today-height-group" style="display:none;">
+        <div>
+          <span class="now-height" id="nowHeight">—</span>
+          <span class="now-unit"> cm</span>
+        </div>
+        <span class="tide-trend" id="tideTrend"></span>
+      </div>
+    </div>
+    <div id="nextTurnRow" style="margin-top:6px;display:none;">
+      <span style="font-size:10px;color:#5a8aa8;">次の転潮：</span>
+      <span id="nextTurn" style="font-size:12px;color:#7ecef0;"></span>
+    </div>
+    <div class="loading-area" id="loadingArea">データ取得中...</div>
+    <div class="extremes-grid" id="extremesGrid"></div>
   </div>
 
   <!-- ── 釣行スコアカード（釣行中のみ表示）── -->
@@ -1349,19 +1372,17 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
   </div>
 </main>
 
-<!-- ── カレンダー日別詳細モーダル ──────────────────── -->
-<div class="modal-overlay hidden" id="calDayModal">
-  <div class="sheet">
-    <div class="cal-day-hdr">
-      <button class="btn-close-catch" id="btnCalDayClose">✕</button>
-      <div class="cal-day-title-wrap">
-        <div class="cal-day-title" id="calDayTitle"></div>
-        <div class="cal-day-meta"  id="calDayMeta"></div>
-      </div>
-      <div class="cal-day-moon-lg" id="calDayMoon"></div>
+<!-- ── カレンダー日別詳細ページ（全画面切替）────────── -->
+<div id="calDayPage" class="hidden">
+  <div class="cal-day-page-hdr">
+    <button class="cal-day-back-btn" id="btnCalDayClose">← カレンダーに戻る</button>
+    <div class="cal-day-title-block">
+      <div class="cal-day-title" id="calDayTitle"></div>
+      <div class="cal-day-meta"  id="calDayMeta"></div>
     </div>
-    <div class="cal-day-body" id="calDayBody"></div>
+    <div class="cal-day-moon-lg" id="calDayMoon"></div>
   </div>
+  <div class="cal-day-body" id="calDayBody" style="padding:12px 14px 24px;"></div>
 </div>
 
 <!-- ── 釣果記録モーダル ───────────────────────────── -->
@@ -2209,13 +2230,16 @@ function updateNowInfo(dense, sph, extremes, nowH) {
   document.getElementById('nowHeight').textContent = nowCm;
 
   const rising = dense[Math.min(idx + 1, dense.length - 1)] > dense[idx];
-  document.getElementById('tideTrend').textContent   = rising ? '↑ 上げ潮' : '↓ 下げ潮';
-  document.getElementById('tideTrend').style.color   = rising ? '#e74c3c'  : '#2e8fd1';
+  document.getElementById('tideTrend').textContent = rising ? '↑ 上げ潮' : '↓ 下げ潮';
+  document.getElementById('tideTrend').style.color = rising ? '#e74c3c'  : '#2e8fd1';
 
   const next = extremes.find(e => e.sampleIdx > idx);
-  document.getElementById('nextTurn').textContent = next
-    ? `${formatTime(next.totalMinutes)} ${next.type === 'high' ? '満潮' : '干潮'} (${next.height}cm)`
+  const nextEl = document.getElementById('nextTurn');
+  const nextRow = document.getElementById('nextTurnRow');
+  if (nextEl) nextEl.textContent = next
+    ? `${formatTime(next.totalMinutes)} ${next.type === 'high' ? '満潮' : '干潮'} ${next.height}cm`
     : '—';
+  if (nextRow) nextRow.style.display = 'block';
 
   document.getElementById('nowInfo').style.display = 'flex';
 }
@@ -2267,11 +2291,9 @@ function renderChanceTimes(chanceBands) {
 let tideData = { dense: null, extremes: null };
 
 async function init() {
-  const now = today();
+  const now  = today();
+  const nowH = now.getHours() + now.getMinutes() / 60;
   document.getElementById('dateLabel').textContent = formatDate(now);
-
-  const canvas = document.getElementById('tideCanvas');
-  const nowH   = now.getHours() + now.getMinutes() / 60;
   let heights;
 
   try {
@@ -2281,43 +2303,28 @@ async function init() {
   } catch (err) {
     console.warn('JMA fetch failed:', err);
     heights = approxTide(now);
-    setStatus('warn', '近似値表示中（気象庁API取得不可 — CORS制限の可能性）');
+    setStatus('warn', '近似値表示中（気象庁API取得不可）');
   }
 
-  // 24点 → 1441点（Catmull-Rom補間）
-  // 気象庁データはすでに T.P. 基準で提供されるため変換不要
-  const dense       = catmullRomInterpolate(heights, SPH);
-  const extremes    = findExtremes(dense, SPH);
-  const chanceBands = calcChanceTimes(extremes);
-  const sunTimes    = calcSunTimes(now);
+  const dense    = catmullRomInterpolate(heights, SPH);
+  const extremes = findExtremes(dense, SPH);
+  const sunTimes = calcSunTimes(now);
   tideData.dense      = dense;
   tideData.extremes   = extremes;
-  tideData.rawHeights = heights.slice(); // 過去釣行の再描画用に保存
+  tideData.rawHeights = heights.slice();
   tideData.sunTimes   = sunTimes;
 
   document.getElementById('loadingArea').style.display = 'none';
-  canvas.style.display = 'block';
-
-  drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands, sunTimes);
   renderExtremes(extremes);
   updateNowInfo(dense, SPH, extremes, nowH);
-  renderChanceTimes(chanceBands);
 
-  // リサイズ対応
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands, sunTimes), 120);
-  });
-
-  // ホバーで潮位ツールチップ
-  canvas.addEventListener('mousemove', (e) => {
-    const rect  = canvas.getBoundingClientRect();
-    const GW    = parseFloat(canvas.style.width) - 46 - 16;
-    const hoverH = Math.max(0, Math.min(24, ((e.clientX - rect.left - 46) / GW) * 24));
-    const idx    = Math.min(Math.round(hoverH * SPH), dense.length - 1);
-    canvas.title = `${formatTime(Math.round(hoverH * 60))} → ${Math.round(dense[idx])} cm`;
-  });
+  // コンパクトカードに今日の潮回り・月齢アイコンを表示
+  const todayAge  = moonAge(now);
+  const todayType = getTideTypeName(todayAge);
+  const badge  = document.getElementById('compactTideTypeBadge');
+  const moonEl = document.getElementById('compactMoonIconHome');
+  if (badge)  { badge.textContent = todayType; badge.className = `cal-tide-badge ${todayType}`; }
+  if (moonEl) moonEl.textContent = getMoonIcon(todayAge);
 }
 
 init();
@@ -4399,46 +4406,65 @@ function fmtDecHr(h) {
   return `${String(Math.floor(h)).padStart(2,'0')}:${String(Math.round((h % 1) * 60)).padStart(2,'0')}`;
 }
 
+function openCalDayPage() {
+  document.getElementById('calDayPage').classList.remove('hidden');
+  document.getElementById('calDayPage').scrollTop = 0;
+  document.body.style.overflow = 'hidden'; // prevent background scroll bleed
+}
+
+function closeCalDay() {
+  document.getElementById('calDayPage').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
 async function openCalDay(dateStr) {
   const [yr, mo, dy] = dateStr.split('-').map(Number);
-  const date      = new Date(yr, mo - 1, dy);
-  const age       = moonAge(date);
-  const tideType  = getTideTypeName(age);
-  const sunTimes  = calcSunTimes(date);
-  const dow       = ['日','月','火','水','木','金','土'][date.getDay()];
+  const date     = new Date(yr, mo - 1, dy);
+  const age      = moonAge(date);
+  const tideType = getTideTypeName(age);
+  const sunTimes = calcSunTimes(date);
+  const dow      = ['日','月','火','水','木','金','土'][date.getDay()];
 
   document.getElementById('calDayTitle').textContent = `${yr}年${mo}月${dy}日（${dow}）`;
   document.getElementById('calDayMeta').textContent  = `${tideType}　月齢 ${Math.floor(age)} 日`;
   document.getElementById('calDayMoon').textContent  = getMoonIcon(age);
 
   const body = document.getElementById('calDayBody');
-  body.innerHTML = `<div style="text-align:center;padding:28px;color:#5a8aa8;">データ取得中…</div>`;
-  document.getElementById('calDayModal').classList.remove('hidden');
+  body.innerHTML = `<div style="text-align:center;padding:40px;color:#5a8aa8;">データ取得中…</div>`;
+  openCalDayPage();
+
+  // For today: reuse already-fetched tideData to avoid double fetch
+  const todayStr = (() => {
+    const t = today();
+    return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  })();
 
   let dayData;
-  try {
-    const monthData = await getCalMonthData(yr, mo - 1);
-    dayData = monthData[dy - 1] || calEstimateDay(date);
-  } catch { dayData = calEstimateDay(date); }
+  if (dateStr === todayStr && tideData.dense) {
+    dayData = { dense: tideData.dense, extremes: tideData.extremes, isEstimate: false };
+  } else {
+    try {
+      const monthData = await getCalMonthData(yr, mo - 1);
+      dayData = monthData[dy - 1] || calEstimateDay(date);
+    } catch { dayData = calEstimateDay(date); }
+  }
 
   const { dense, extremes, isEstimate } = dayData;
-  const score      = getRecoScore(age, tideType, extremes);
-  const isPlanned  = loadPlans().includes(dateStr);
-  const sortedExt  = [...extremes].sort((a, b) => a.totalMinutes - b.totalMinutes);
-  const highs      = extremes.filter(e => e.type === 'high');
+  const score     = getRecoScore(age, tideType, extremes);
+  const isPlanned = loadPlans().includes(dateStr);
+  const sortedExt = [...extremes].sort((a, b) => a.totalMinutes - b.totalMinutes);
+  const highs     = extremes.filter(e => e.type === 'high');
 
-  // Chance bands for graph (±60min around high tides)
   const chanceBands = highs.map(h => ({
     startMin: Math.max(0,    h.totalMinutes - 60),
     endMin:   Math.min(1440, h.totalMinutes + 60),
   }));
 
-  // Chance time text
   const chanceTimes = [];
   highs.forEach(h => {
     const m = h.totalMinutes;
-    if (m >= 300 && m <= 480)   chanceTimes.push(`🌅 朝マズメ満潮　${formatTime(m)}（${h.height}cm）`);
-    if (m >= 960 && m <= 1200)  chanceTimes.push(`🌇 夕マズメ満潮　${formatTime(m)}（${h.height}cm）`);
+    if (m >= 300 && m <= 480)  chanceTimes.push(`🌅 朝マズメ満潮　${formatTime(m)}（${h.height}cm）`);
+    if (m >= 960 && m <= 1200) chanceTimes.push(`🌇 夕マズメ満潮　${formatTime(m)}（${h.height}cm）`);
   });
   chanceTimes.push(`🌅 日の出前後　${fmtDecHr(sunTimes.rise)} 〜`);
   chanceTimes.push(`🌇 日の入り前後　〜 ${fmtDecHr(sunTimes.set)}`);
@@ -4454,6 +4480,10 @@ async function openCalDay(dateStr) {
 
   const estNote = isEstimate
     ? `<div class="cal-estimate-note">⚠ 翌々月以降は月齢からの推定値です。実際の潮汐と異なる場合があります。</div>` : '';
+
+  // Today's nowH for the "now" marker on the graph
+  const isToday   = dateStr === todayStr;
+  const nowH      = isToday ? (today().getHours() + today().getMinutes() / 60) : -999;
 
   body.innerHTML = `
     ${estNote}
@@ -4481,11 +4511,11 @@ async function openCalDay(dateStr) {
         <div class="cal-info-value">${fmtDecHr(sunTimes.set)}</div>
       </div>
     </div>
-    <div class="cal-tide-table">${sortedExt.map(tideRowHTML).join('')}</div>
     <div class="cal-day-graph-wrap">
       <canvas class="cal-day-graph" id="calDayGraph"></canvas>
     </div>
-    <div class="cal-chance-section">
+    <div class="cal-tide-table">${sortedExt.map(tideRowHTML).join('')}</div>
+    <div class="cal-chance-section" style="margin-top:10px;">
       <div class="cal-chance-title">⭐ おすすめチャンスタイム</div>
       ${chanceTimes.map(t => `<div class="cal-chance-item">${t}</div>`).join('')}
     </div>
@@ -4497,7 +4527,7 @@ async function openCalDay(dateStr) {
   requestAnimationFrame(() => {
     const canvas = document.getElementById('calDayGraph');
     if (canvas && dense) {
-      try { drawGraph(canvas, dense, SPH, -999, extremes, chanceBands, sunTimes); }
+      try { drawGraph(canvas, dense, SPH, nowH, extremes, chanceBands, sunTimes); }
       catch(e) { console.warn('calDayGraph:', e); }
     }
   });
@@ -4525,9 +4555,7 @@ document.getElementById('calNextBtn').addEventListener('click', () => {
   calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
   renderCalendar();
 });
-document.getElementById('btnCalDayClose').addEventListener('click', () => {
-  document.getElementById('calDayModal').classList.add('hidden');
-});
+document.getElementById('btnCalDayClose').addEventListener('click', closeCalDay);
 
 renderCalendar();
 </script>
