@@ -265,7 +265,7 @@ main {
 }
 
 /* ── BOTTOM ACTION BAR (legacy, hidden) ────────── */
-main { padding-bottom: 150px; }
+main { padding-bottom: 160px; }
 
 /* ── BOTTOM NAV ───────────────────────────────── */
 .bottom-nav {
@@ -274,7 +274,7 @@ main { padding-bottom: 150px; }
   background: #060f1c;
   border-top: 1px solid #1b3a58;
   padding-bottom: env(safe-area-inset-bottom);
-  z-index: 300;
+  z-index: 600;
 }
 .nav-tab {
   flex: 1; display: flex; flex-direction: column;
@@ -560,6 +560,7 @@ main { padding-bottom: 150px; }
   overflow-y: auto;
   flex: 1;
   padding: 14px 16px 8px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
 }
 .catch-ftr {
@@ -1057,6 +1058,72 @@ main { padding-bottom: 150px; }
 .record-fish-species { font-size: 16px; font-weight: 700; color: #e8f4fb; }
 .record-fish-size { font-size: 22px; font-weight: 700; color: #f0c040; }
 .record-fish-date { font-size: 12px; color: #5a8aa8; margin-top: 2px; }
+
+/* ── FISH SELECT BAR & SHEET ──────────────────── */
+.fish-select-bar {
+  width: 100%; padding: 14px 16px;
+  background: #091828; border: 1.5px solid #253e56; border-radius: 12px;
+  color: #8ab8d0; font-size: 16px; font-family: inherit;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+}
+.fish-select-bar.sel { color: #fff; border-color: #2e8fd1; background: #1a3d5c; }
+#fishSheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0b1f36; border-top: 2px solid #2e8fd1;
+  border-radius: 18px 18px 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  z-index: 700; transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+#fishSheet.open { transform: translateY(0); }
+.fish-sheet-title { font-size: 16px; font-weight: 700; color: #7ecef0; margin-bottom: 12px; text-align: center; }
+#fishSheetBackdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 690; display: none;
+}
+#fishSheetBackdrop.open { display: block; }
+
+/* ── SIZE INPUT (replaces keypad) ─────────────── */
+.size-number-input {
+  width: 100%;
+  background: #091828;
+  border: 1.5px solid #253e56;
+  border-radius: 12px;
+  color: #e8f4fb;
+  font-size: 22px;
+  font-family: inherit;
+  padding: 12px 16px;
+  text-align: center;
+  -webkit-appearance: none;
+}
+.size-number-input:focus { outline: none; border-color: #2e8fd1; }
+.size-number-input::placeholder { color: #2a5070; }
+
+/* ── MANUAL RECORD FORM ─────────────────────── */
+.manual-record-form {
+  background: #040d18; border: 1px solid #1b3a58;
+  border-radius: 12px; padding: 14px; margin-top: 8px;
+}
+.manual-record-form label { display: block; font-size: 12px; color: #5a8aa8; margin-bottom: 4px; }
+.manual-record-form input {
+  width: 100%; padding: 8px 12px; box-sizing: border-box;
+  background: #091828; border: 1.5px solid #253e56;
+  border-radius: 8px; color: #e8f4fb; font-size: 14px; font-family: inherit;
+  margin-bottom: 10px;
+}
+.manual-record-form input:focus { outline: none; border-color: #2e8fd1; }
+.btn-add-manual-record {
+  display: block; width: 100%; padding: 12px;
+  font-size: 14px; font-family: inherit; font-weight: 600;
+  background: none; color: #2e8fd1;
+  border: 1.5px dashed #2e8fd1; border-radius: 10px; cursor: pointer;
+  margin-top: 8px;
+}
+.record-source-tag {
+  font-size: 11px; padding: 2px 6px; border-radius: 6px;
+  background: #0d2035; color: #5a8aa8; margin-left: 6px;
+}
 </style>
 </head>
 <body>
@@ -1148,24 +1215,10 @@ main { padding-bottom: 150px; }
     <!-- 1. 魚種 -->
     <div class="sec">
       <div class="sec-lbl">魚 種</div>
-      <div class="fish-grid" id="fishGrid">
-        <div class="fish-chip" data-val="口太メジナ">口太メジナ</div>
-        <div class="fish-chip" data-val="尾長メジナ">尾長メジナ</div>
-        <div class="fish-chip" data-val="クロダイ">クロダイ</div>
-        <div class="fish-chip" data-val="イサキ">イサキ</div>
-        <div class="fish-chip" data-val="ヘダイ">ヘダイ</div>
-        <div class="fish-chip" data-val="コロダイ">コロダイ</div>
-        <div class="fish-chip" data-val="フエフキ">フエフキ</div>
-        <div class="fish-chip" data-val="フエダイ">フエダイ</div>
-        <div class="fish-chip" data-val="オジサン">オジサン</div>
-        <div class="fish-chip" data-val="メバル">メバル</div>
-        <div class="fish-chip" data-val="ブダイ">ブダイ</div>
-        <div class="fish-chip" data-val="タカノハダイ">タカノハダイ</div>
-        <div class="fish-chip" data-val="アイゴ">アイゴ</div>
-        <div class="fish-chip" data-val="イスズミ">イスズミ</div>
-        <div class="fish-chip" data-val="ウツボ">ウツボ</div>
-        <div class="fish-chip" data-val="その他">その他</div>
-      </div>
+      <button class="fish-select-bar" id="fishSelectBar">
+        <span id="fishSelectLabel">魚種を選択 ▼</span>
+        <span>▼</span>
+      </button>
     </div>
 
     <!-- 2. サイズ -->
@@ -1182,20 +1235,7 @@ main { padding-bottom: 150px; }
         <button class="preset-btn" data-size="50">50</button>
         <button class="preset-btn" data-size="55">55</button>
       </div>
-      <div class="keypad-grid">
-        <button class="key-btn" data-key="1">1</button>
-        <button class="key-btn" data-key="2">2</button>
-        <button class="key-btn" data-key="3">3</button>
-        <button class="key-btn" data-key="4">4</button>
-        <button class="key-btn" data-key="5">5</button>
-        <button class="key-btn" data-key="6">6</button>
-        <button class="key-btn" data-key="7">7</button>
-        <button class="key-btn" data-key="8">8</button>
-        <button class="key-btn" data-key="9">9</button>
-        <button class="key-btn key-clear" data-key="C">クリア</button>
-        <button class="key-btn" data-key="0">0</button>
-        <button class="key-btn key-back" data-key="B">⌫</button>
-      </div>
+      <input type="number" id="sizeInput" class="size-number-input" min="1" max="150" placeholder="サイズ (cm)">
     </div>
 
     <!-- 3. キープ / リリース -->
@@ -1253,6 +1293,30 @@ main { padding-bottom: 150px; }
 
   <div class="catch-ftr">
     <button class="btn-record" id="btnRecord">📝 記録する</button>
+  </div>
+</div>
+
+<!-- ── 魚種選択シート ────────────────────────────── -->
+<div id="fishSheetBackdrop"></div>
+<div id="fishSheet">
+  <div class="fish-sheet-title">魚種を選択</div>
+  <div class="fish-grid" id="fishGrid">
+    <div class="fish-chip" data-val="口太メジナ">口太メジナ</div>
+    <div class="fish-chip" data-val="尾長メジナ">尾長メジナ</div>
+    <div class="fish-chip" data-val="クロダイ">クロダイ</div>
+    <div class="fish-chip" data-val="イサキ">イサキ</div>
+    <div class="fish-chip" data-val="ヘダイ">ヘダイ</div>
+    <div class="fish-chip" data-val="コロダイ">コロダイ</div>
+    <div class="fish-chip" data-val="フエフキ">フエフキ</div>
+    <div class="fish-chip" data-val="フエダイ">フエダイ</div>
+    <div class="fish-chip" data-val="オジサン">オジサン</div>
+    <div class="fish-chip" data-val="メバル">メバル</div>
+    <div class="fish-chip" data-val="ブダイ">ブダイ</div>
+    <div class="fish-chip" data-val="タカノハダイ">タカノハダイ</div>
+    <div class="fish-chip" data-val="アイゴ">アイゴ</div>
+    <div class="fish-chip" data-val="イスズミ">イスズミ</div>
+    <div class="fish-chip" data-val="ウツボ">ウツボ</div>
+    <div class="fish-chip" data-val="その他">その他</div>
   </div>
 </div>
 
@@ -1474,6 +1538,9 @@ main { padding-bottom: 150px; }
         </div>
       </div>
 
+      <!-- 手動入力セクション（タックルプリセット非選択時に表示） -->
+      <div id="manualTackleSection" class="hidden">
+
       <!-- ウキ 種類 -->
       <div class="sec">
         <div class="sec-lbl">ウキ 種類</div>
@@ -1538,6 +1605,8 @@ main { padding-bottom: 150px; }
           <button class="step-btn" id="hookPlus">＋</button>
         </div>
       </div>
+
+      </div><!-- /manualTackleSection -->
 
       <!-- 付け餌 -->
       <div class="sec">
@@ -1753,7 +1822,8 @@ function findExtremes(dense, sph) {
 
 // ── Canvas グラフ描画 ──────────────────────────────
 // dense: 1441点の補間済み配列, sph: SPH, extremes: 事前計算済み
-function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTimes = null) {
+// zoomRange: { startMin, endMin } — if provided, zoom to that range (minutes 0-1440)
+function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTimes = null, zoomRange = null) {
   const dpr = window.devicePixelRatio || 1;
   const W   = canvas.parentElement.clientWidth - 40;
   const H   = 240;
@@ -1770,75 +1840,91 @@ function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTime
   const GH   = H - PAD.top  - PAD.bottom;
   const LAST = dense.length - 1; // 1440
 
-  const minV = Math.min(...dense), maxV = Math.max(...dense);
-  const span = maxV - minV || 1;
+  // Fixed Y-axis scale
+  const FIXED_MIN = -100, FIXED_MAX = 350;
+  const minV = FIXED_MIN, maxV = FIXED_MAX;
+  const span = maxV - minV; // always 450
 
-  // サンプルインデックス→x座標（0→0:00, 1440→24:00）
-  const xOf = (idx) => PAD.left + (idx / LAST) * GW;
+  // Zoom range setup
+  const zStartMin = zoomRange ? zoomRange.startMin : 0;
+  const zEndMin   = zoomRange ? zoomRange.endMin   : 1440;
+  const zStartIdx = Math.round(zStartMin * sph / 60);
+  const zEndIdx   = Math.round(zEndMin   * sph / 60);
+
+  // サンプルインデックス→x座標（ズーム対応）
+  const xOf = (idx) => PAD.left + ((idx - zStartIdx) / (zEndIdx - zStartIdx)) * GW;
   const yOf = (v)   => PAD.top  + GH - ((v - minV) / span) * GH;
-  const xOfH = (h)  => PAD.left + (h / 24) * GW; // 時間→x
+  // 時間(h)→x座標（ズーム対応）
+  const xOfH = (h)  => {
+    const mins = h * 60;
+    return PAD.left + ((mins - zStartMin) / (zEndMin - zStartMin)) * GW;
+  };
+  // 分→x座標（ズーム対応）
+  const xOfMins = (mins) => PAD.left + ((mins - zStartMin) / (zEndMin - zStartMin)) * GW;
 
   // 背景
   ctx.fillStyle = '#091828';
   ctx.fillRect(0, 0, W, H);
 
-  // ── 日の出・日の入り帯 ──────────────────────────────
+  // ── 日の出・日の入りトップバー ──────────────────────
   if (sunTimes) {
     const { rise, set } = sunTimes;
-    const xRise = xOfH(Math.max(0, rise));
-    const xSet  = xOfH(Math.min(24, set));
+    const riseMins = rise * 60;
+    const setMins  = set  * 60;
 
-    // 夜帯（0:00〜日の出）濃紺
-    ctx.fillStyle = 'rgba(4,10,28,0.60)';
-    ctx.fillRect(PAD.left, PAD.top, xRise - PAD.left, GH);
+    const barY = 4;
+    const barH = 10;
 
-    // 昼帯（日の出〜日の入り）薄オレンジ
-    ctx.fillStyle = 'rgba(255,150,40,0.07)';
-    ctx.fillRect(xRise, PAD.top, xSet - xRise, GH);
+    // Draw night bar (full width first)
+    ctx.fillStyle = 'rgba(20,40,80,0.9)';
+    ctx.fillRect(PAD.left, barY, GW, barH);
 
-    // 夜帯（日の入り〜24:00）濃紺
-    ctx.fillStyle = 'rgba(4,10,28,0.60)';
-    ctx.fillRect(xSet, PAD.top, PAD.left + GW - xSet, GH);
+    // Draw day portion
+    const xDayStart = Math.max(PAD.left, xOfMins(Math.max(zStartMin, riseMins)));
+    const xDayEnd   = Math.min(PAD.left + GW, xOfMins(Math.min(zEndMin, setMins)));
+    if (xDayEnd > xDayStart) {
+      ctx.fillStyle = 'rgba(255,140,30,0.85)';
+      ctx.fillRect(xDayStart, barY, xDayEnd - xDayStart, barH);
+    }
 
-    // 境界線（オレンジ破線）
-    ctx.setLineDash([3, 3]);
-    ctx.lineWidth = 1;
-    [{ x: xRise, label: '☀ ' + formatTime(Math.round(rise * 60)), align: 'left'  },
-     { x: xSet,  label: formatTime(Math.round(set  * 60)) + ' ☽', align: 'right' }]
-    .forEach(({ x, label, align }) => {
-      ctx.strokeStyle = 'rgba(255,150,40,0.55)';
-      ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, PAD.top + GH); ctx.stroke();
+    // Tick marks and labels at rise/set
+    const tickItems = [
+      { mins: riseMins, label: '☀' + formatTime(Math.round(riseMins)), align: 'left'  },
+      { mins: setMins,  label: formatTime(Math.round(setMins)) + '🌙', align: 'right' },
+    ];
+    ctx.font = `bold 8px 'Hiragino Kaku Gothic ProN', sans-serif`;
+    tickItems.forEach(({ mins, label, align }) => {
+      if (mins < zStartMin || mins > zEndMin) return;
+      const x = xOfMins(mins);
+      // tick mark
+      ctx.strokeStyle = 'rgba(255,220,100,0.9)';
+      ctx.lineWidth = 1;
       ctx.setLineDash([]);
-
-      // ラベル背景
-      ctx.font = `bold 9px 'Hiragino Kaku Gothic ProN', sans-serif`;
+      ctx.beginPath(); ctx.moveTo(x, barY); ctx.lineTo(x, barY + barH + 4); ctx.stroke();
+      // label
       const tw = ctx.measureText(label).width;
       const lx = align === 'left' ? x + 3 : x - tw - 3;
-      const ly = PAD.top + 2;
-      ctx.fillStyle = 'rgba(4,10,28,0.65)';
-      ctx.fillRect(lx - 1, ly, tw + 2, 11);
-
-      // ラベルテキスト
-      ctx.fillStyle = 'rgba(255,180,80,0.92)';
+      const clampedLx = Math.max(PAD.left, Math.min(PAD.left + GW - tw - 2, lx));
+      ctx.fillStyle = 'rgba(255,210,80,0.95)';
       ctx.textAlign = 'left';
-      ctx.fillText(label, lx, ly + 9);
-
-      ctx.setLineDash([3, 3]); // 次のループ用に戻す
+      ctx.fillText(label, clampedLx, barY + barH + 11);
     });
-    ctx.setLineDash([]);
   }
 
   // チャンスタイム帯（金色ハイライト）
   chanceBands.forEach(band => {
-    const x1 = PAD.left + (band.start / 1440) * GW;
-    const x2 = PAD.left + (band.end   / 1440) * GW;
+    const x1 = xOfMins(band.start);
+    const x2 = xOfMins(band.end);
+    const clampedX1 = Math.max(PAD.left, x1);
+    const clampedX2 = Math.min(PAD.left + GW, x2);
+    if (clampedX2 <= clampedX1) return;
     ctx.fillStyle = 'rgba(240,192,64,0.13)';
-    ctx.fillRect(x1, PAD.top, Math.max(0, x2 - x1), GH);
+    ctx.fillRect(clampedX1, PAD.top, clampedX2 - clampedX1, GH);
     ctx.strokeStyle = 'rgba(240,192,64,0.35)';
     ctx.lineWidth = 1; ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.moveTo(x1, PAD.top); ctx.lineTo(x1, PAD.top + GH);
-    ctx.moveTo(x2, PAD.top); ctx.lineTo(x2, PAD.top + GH);
+    if (x1 >= PAD.left && x1 <= PAD.left + GW) { ctx.moveTo(x1, PAD.top); ctx.lineTo(x1, PAD.top + GH); }
+    if (x2 >= PAD.left && x2 <= PAD.left + GW) { ctx.moveTo(x2, PAD.top); ctx.lineTo(x2, PAD.top + GH); }
     ctx.stroke();
   });
 
@@ -1858,47 +1944,65 @@ function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTime
   ctx.fillText('T.P.', 2, PAD.top - 4);
   ctx.fillText('cm',   2, PAD.top + 6);
 
-  // 垂直グリッド（3時間ごと）
-  for (let h = 0; h <= 24; h += 3) {
-    const x = PAD.left + (h / 24) * GW;
+  // 垂直グリッド（ズーム範囲に応じて時間ラベル）
+  const zDurH = (zEndMin - zStartMin) / 60;
+  const hStep = zDurH <= 6 ? 1 : zDurH <= 12 ? 2 : 3;
+  const hStart = Math.ceil(zStartMin / 60 / hStep) * hStep;
+  const hEnd   = Math.floor(zEndMin  / 60 / hStep) * hStep;
+  for (let h = hStart; h <= hEnd; h += hStep) {
+    const x = xOfH(h);
+    if (x < PAD.left - 1 || x > PAD.left + GW + 1) continue;
     ctx.strokeStyle = '#1a3555'; ctx.lineWidth = 0.5;
+    ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, PAD.top + GH); ctx.stroke();
     ctx.fillStyle = '#3d7ca8'; ctx.textAlign = 'center';
+    ctx.font = `11px 'Hiragino Kaku Gothic ProN', sans-serif`;
     ctx.fillText(h === 0 ? '0' : h + ':00', x, H - 8);
   }
 
   // 現在時刻ライン
   if (nowH >= 0 && nowH <= 24) {
-    const cx = PAD.left + (nowH / 24) * GW;
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = 'rgba(240,192,64,0.5)'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(cx, PAD.top); ctx.lineTo(cx, PAD.top + GH); ctx.stroke();
-    ctx.setLineDash([]);
+    const nowMins = nowH * 60;
+    if (nowMins >= zStartMin && nowMins <= zEndMin) {
+      const cx = xOfH(nowH);
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(240,192,64,0.5)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx, PAD.top); ctx.lineTo(cx, PAD.top + GH); ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
 
-  // ── グラデーション塗りつぶし（1441点の lineTo で完全スムース）──
+  // ── グラデーション塗りつぶし（ズーム範囲の lineTo で完全スムース）──
   const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + GH);
   grad.addColorStop(0, 'rgba(30,111,168,0.55)');
   grad.addColorStop(1, 'rgba(30,111,168,0.04)');
 
+  ctx.save();
+  ctx.rect(PAD.left, PAD.top, GW, GH);
+  ctx.clip();
+
   ctx.beginPath();
-  ctx.moveTo(xOf(0), yOf(dense[0]));
-  for (let i = 1; i <= LAST; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
-  ctx.lineTo(xOf(LAST), PAD.top + GH);
-  ctx.lineTo(xOf(0),    PAD.top + GH);
+  ctx.moveTo(xOf(zStartIdx), yOf(dense[zStartIdx]));
+  for (let i = zStartIdx + 1; i <= zEndIdx; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
+  ctx.lineTo(xOf(zEndIdx), PAD.top + GH);
+  ctx.lineTo(xOf(zStartIdx), PAD.top + GH);
   ctx.closePath();
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // ── メインカーブ（同じく lineTo で滑らか）──────────
+  // ── メインカーブ ──────────────────────────────────
   ctx.beginPath();
-  ctx.moveTo(xOf(0), yOf(dense[0]));
-  for (let i = 1; i <= LAST; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
+  ctx.moveTo(xOf(zStartIdx), yOf(dense[zStartIdx]));
+  for (let i = zStartIdx + 1; i <= zEndIdx; i++) ctx.lineTo(xOf(i), yOf(dense[i]));
   ctx.strokeStyle = '#2e8fd1'; ctx.lineWidth = 2.5;
   ctx.stroke();
 
+  ctx.restore();
+
   // 満潮・干潮マーカー
   extremes.forEach(pt => {
+    const ptMins = pt.totalMinutes;
+    if (ptMins < zStartMin || ptMins > zEndMin) return;
     const x = xOf(pt.sampleIdx), y = yOf(dense[pt.sampleIdx]);
     ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fillStyle = pt.type === 'high' ? '#e74c3c' : '#2e8fd1'; ctx.fill();
@@ -1907,13 +2011,16 @@ function drawGraph(canvas, dense, sph, nowH, extremes, chanceBands = [], sunTime
 
   // 現在位置ドット
   if (nowH >= 0 && nowH < 24) {
-    const idx = Math.min(Math.round(nowH * sph), LAST);
-    const cx = xOf(idx), cy = yOf(dense[idx]);
-    ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(240,192,64,0.2)'; ctx.fill();
-    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#f0c040'; ctx.fill();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    const nowMins = nowH * 60;
+    if (nowMins >= zStartMin && nowMins <= zEndMin) {
+      const idx = Math.min(Math.round(nowH * sph), LAST);
+      const cx = xOf(idx), cy = yOf(dense[idx]);
+      ctx.beginPath(); ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(240,192,64,0.2)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#f0c040'; ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    }
   }
 }
 
@@ -2060,6 +2167,7 @@ init();
 const session = {
   active: false,
   startTime: null,
+  endTime: null,
   catches: 0,
   barras: 0,
   elapsedTimer: null,
@@ -2116,6 +2224,7 @@ function navigateTo(page) {
   if (page === 'start') {
     if (!session.active) {
       document.getElementById('setupModal').classList.remove('hidden');
+      applyMyPagePresetsToSetup();
       fetchGPS();
     }
     return;
@@ -2193,7 +2302,8 @@ function startSession() {
 function endSession() {
   if (!confirm('釣行を終了しますか？')) return;
   clearInterval(session.elapsedTimer);
-  session.active = false;
+  session.active  = false;
+  session.endTime = Date.now();
   saveCurrentSession();
   applyState();
   showEndScreen();
@@ -2251,6 +2361,104 @@ bindChips('chipBait',      'bait');
 bindChips('chipChum',      'chum', true);
 bindChips('chipWind',      'wind');
 
+// ── マイページプリセットをセットアップモーダルへ反映 ──
+function applyMyPagePresetsToSetup() {
+  // ─ タックルプリセット ─
+  const tacklePresets = getTacklePresets ? getTacklePresets() : [];
+  const chipTackleEl = document.getElementById('chipTackle');
+  if (chipTackleEl && tacklePresets.length) {
+    chipTackleEl.innerHTML = '';
+    tacklePresets.forEach((p, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (i === 0 ? ' sel' : '');
+      chip.dataset.val = p.name;
+      chip.textContent = p.name;
+      chipTackleEl.appendChild(chip);
+    });
+    // 手動入力チップ
+    const manualChip = document.createElement('div');
+    manualChip.className = 'chip';
+    manualChip.dataset.val = '手動入力';
+    manualChip.textContent = '手動入力';
+    chipTackleEl.appendChild(manualChip);
+    // Set first preset as default
+    if (tacklePresets[0]) session.setup.tackle = tacklePresets[0].name;
+    // Hide manual section by default (preset selected)
+    const manSec = document.getElementById('manualTackleSection');
+    if (manSec) manSec.classList.add('hidden');
+  } else {
+    // No presets — show manual section
+    const manSec = document.getElementById('manualTackleSection');
+    if (manSec) manSec.classList.remove('hidden');
+  }
+
+  // Bind tackle chips with manual section toggle
+  if (chipTackleEl) {
+    chipTackleEl.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chipTackleEl.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        const val = chip.dataset.val;
+        const manSec = document.getElementById('manualTackleSection');
+        if (val === '手動入力') {
+          session.setup.tackle = '';
+          if (manSec) manSec.classList.remove('hidden');
+        } else {
+          session.setup.tackle = val;
+          if (manSec) manSec.classList.add('hidden');
+        }
+      });
+    });
+  }
+
+  // ─ ウキプリセット ─
+  const floatPresets = getFloatPresets ? getFloatPresets() : [];
+  const chipFloatTypeEl = document.getElementById('chipFloatType');
+  if (chipFloatTypeEl && floatPresets.length) {
+    chipFloatTypeEl.innerHTML = '';
+    floatPresets.forEach((p, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (i === 0 ? ' sel' : '');
+      chip.dataset.val = p.name;
+      chip.textContent = p.name;
+      chipFloatTypeEl.appendChild(chip);
+      if (i === 0) {
+        session.setup.floatType = p.name;
+        if (p.buoyancy) {
+          session.setup.buoyancy = p.buoyancy;
+          syncChipUI('chipBuoyancy', p.buoyancy);
+        }
+      }
+    });
+    // 手動入力チップ
+    const manualChip = document.createElement('div');
+    manualChip.className = 'chip';
+    manualChip.dataset.val = '手動入力';
+    manualChip.textContent = '手動入力';
+    chipFloatTypeEl.appendChild(manualChip);
+    bindChips('chipFloatType', 'floatType');
+  }
+
+  // ─ コマセプリセット ─
+  const chumPresets = getChumPresets ? getChumPresets() : [];
+  const chipChumEl = document.getElementById('chipChum');
+  if (chipChumEl && chumPresets.length) {
+    chipChumEl.innerHTML = '';
+    chumPresets.forEach((p, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.dataset.val = p.name;
+      chip.textContent = p.name;
+      chip.addEventListener('click', () => {
+        chipChumEl.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        session.setup.chum = new Set(p.ingredients || []);
+      });
+      chipChumEl.appendChild(chip);
+    });
+  }
+}
+
 // ════════════════════════════════════════════════
 //  釣果記録モーダル
 // ════════════════════════════════════════════════
@@ -2307,6 +2515,16 @@ function updateSizeDisplay() {
   }
 }
 
+// ── 魚種シート開閉 ──────────────────────────────
+function openFishSheet() {
+  document.getElementById('fishSheet').classList.add('open');
+  document.getElementById('fishSheetBackdrop').classList.add('open');
+}
+function closeFishSheet() {
+  document.getElementById('fishSheet').classList.remove('open');
+  document.getElementById('fishSheetBackdrop').classList.remove('open');
+}
+
 // ── モーダル開閉 ──────────────────────────────
 function openCatchModal() {
   catchRec.species     = null;
@@ -2317,14 +2535,23 @@ function openCatchModal() {
   catchRec.spot        = '';
   catchRec.photo       = null;
 
+  // Reset fish select bar
+  const bar = document.getElementById('fishSelectBar');
+  if (bar) { bar.classList.remove('sel'); }
+  const lbl = document.getElementById('fishSelectLabel');
+  if (lbl) lbl.textContent = '魚種を選択 ▼';
+
   document.querySelectorAll('#fishGrid .fish-chip').forEach(c => c.classList.remove('sel'));
   document.querySelectorAll('#chipFlowDir .chip, #chipFlowSpeed .chip').forEach(c => c.classList.remove('sel'));
   document.getElementById('btnKeepCatch').classList.remove('sel');
   document.getElementById('btnReleaseCatch').classList.remove('sel');
   document.getElementById('catchSpotInput').value = '';
+  const sizeInp = document.getElementById('sizeInput');
+  if (sizeInp) sizeInp.value = '';
   updatePhotoPreview(null);
   updateSizeDisplay();
 
+  closeFishSheet();
   document.getElementById('catchModal').classList.remove('hidden');
   document.getElementById('catchModal').scrollTop = 0;
 }
@@ -2336,10 +2563,13 @@ function closeCatchModal() {
 // ── 記録保存 ──────────────────────────────────
 function saveCatch() {
   if (!catchRec.species) {
-    // 魚種未選択時は該当行をハイライト
-    document.getElementById('fishGrid').scrollIntoView({ behavior: 'smooth' });
-    document.querySelector('.fish-grid').style.outline = '2px solid #e74c3c';
-    setTimeout(() => document.querySelector('.fish-grid').style.outline = '', 1200);
+    // 魚種未選択時はセレクトバーをハイライト
+    const bar = document.getElementById('fishSelectBar');
+    if (bar) {
+      bar.scrollIntoView({ behavior: 'smooth' });
+      bar.style.borderColor = '#e74c3c';
+      setTimeout(() => bar.style.borderColor = '', 1200);
+    }
     return;
   }
 
@@ -2413,35 +2643,40 @@ function renderRecords() {
 document.getElementById('btnCloseCatch').addEventListener('click', closeCatchModal);
 document.getElementById('btnRecord').addEventListener('click', saveCatch);
 
-// 魚種選択（単一選択）
+// 魚種選択バー → シートを開く
+document.getElementById('fishSelectBar').addEventListener('click', openFishSheet);
+
+// 魚種シートのバックドロップ
+document.getElementById('fishSheetBackdrop').addEventListener('click', closeFishSheet);
+
+// 魚種選択（単一選択） — now in fishSheet
 document.getElementById('fishGrid').querySelectorAll('.fish-chip').forEach(chip => {
   chip.addEventListener('click', () => {
     document.getElementById('fishGrid').querySelectorAll('.fish-chip')
       .forEach(c => c.classList.remove('sel'));
     chip.classList.add('sel');
     catchRec.species = chip.dataset.val;
+    // Update bar label and close sheet
+    const bar = document.getElementById('fishSelectBar');
+    const lbl = document.getElementById('fishSelectLabel');
+    if (bar) bar.classList.add('sel');
+    if (lbl) lbl.textContent = chip.dataset.val;
+    closeFishSheet();
   });
 });
 
-// テンキー
-document.getElementById('catchModal').querySelectorAll('.key-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const k = btn.dataset.key;
-    if (k === 'C') {
-      catchRec.sizeStr = '';
-    } else if (k === 'B') {
-      catchRec.sizeStr = catchRec.sizeStr.slice(0, -1);
-    } else {
-      if (catchRec.sizeStr.length < 3) catchRec.sizeStr += k;
-    }
-    updateSizeDisplay();
-  });
+// サイズ入力（数値フィールド）
+document.getElementById('sizeInput').addEventListener('input', (e) => {
+  catchRec.sizeStr = e.target.value;
+  updateSizeDisplay();
 });
 
-// プリセットボタン
-document.querySelectorAll('.preset-btn').forEach(btn => {
+// プリセットボタン（catchModal内）
+document.getElementById('catchModal').querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     catchRec.sizeStr = btn.dataset.size;
+    const sizeInp = document.getElementById('sizeInput');
+    if (sizeInp) sizeInp.value = btn.dataset.size;
     updateSizeDisplay();
   });
 });
@@ -2481,6 +2716,8 @@ const FISH_LIST = [
   'フエフキ','フエダイ','オジサン','メバル','ブダイ','タカノハダイ',
   'アイゴ','イスズミ','ウツボ','その他',
 ];
+const FISH_SPECIES = FISH_LIST; // alias for manual records section
+const MANUAL_RECORDS_KEY = 'shioroku_manual_records';
 
 const barraRec = { cause:null, species:null, sizeStr:'', memo:'' };
 
@@ -2646,13 +2883,29 @@ function showEndScreen() {
   }));
 }
 
+function minuteOfDay(ts) {
+  return Math.floor((ts - new Date(new Date(ts).toDateString()).getTime()) / 60000);
+}
+
 function drawSummaryGraph() {
   const canvas = document.getElementById('summaryCanvas');
   if (!tideData.dense) return;
   if (!canvas.parentElement || canvas.parentElement.clientWidth === 0) return;
 
+  // Compute zoom range from session start/end
+  let startMin = 0, endMin = 1440;
+  if (session.startTime) {
+    startMin = Math.max(0, minuteOfDay(session.startTime) - 60);
+  }
+  const endTs = session.endTime || Date.now();
+  endMin = Math.min(1440, minuteOfDay(endTs) + 60);
+  // Make sure we have a reasonable range
+  if (endMin <= startMin) { startMin = 0; endMin = 1440; }
+
+  const zoomRange = { startMin, endMin };
+
   // 共通タイドグラフ描画（現在時刻ドットなし）
-  drawGraph(canvas, tideData.dense, SPH, -999, tideData.extremes, [], tideData.sunTimes || null);
+  drawGraph(canvas, tideData.dense, SPH, -999, tideData.extremes, [], tideData.sunTimes || null, zoomRange);
 
   // ── マーカーオーバーレイ（drawGraph後のスケール済みコンテキストに描画）──
   const ctx  = canvas.getContext('2d');
@@ -2661,11 +2914,14 @@ function drawSummaryGraph() {
   const PAD  = { top:20, right:16, bottom:38, left:46 };
   const GW   = W - PAD.left - PAD.right;
   const GH   = H - PAD.top  - PAD.bottom;
-  const LAST = tideData.dense.length - 1;
-  const minV = Math.min(...tideData.dense);
-  const span = Math.max(...tideData.dense) - minV || 1;
 
-  const xOf = (mins)  => PAD.left + (mins / 1440) * GW;
+  // Fixed Y scale matching drawGraph
+  const FIXED_MIN = -100, FIXED_MAX = 350;
+  const minV = FIXED_MIN;
+  const span = FIXED_MAX - FIXED_MIN;
+
+  // Zoom-aware xOf (mirrors drawGraph logic)
+  const xOf = (mins)  => PAD.left + ((mins - startMin) / (endMin - startMin)) * GW;
   const yOf = (v)     => PAD.top  + GH - ((v - minV) / span) * GH;
 
   function timeToMins(t) {
@@ -2770,6 +3026,7 @@ document.getElementById('btnBackHome').addEventListener('click', () => {
   session.catches     = 0;
   session.barras      = 0;
   session.tripPhoto   = null;
+  session.endTime     = null;
   updateTripPhotoPreview(null);
   renderRecords();
   updateScore();
@@ -2951,16 +3208,28 @@ function drawHistoryGraph(trip) {
   const dense    = catmullRomInterpolate(trip.tideHeights, SPH);
   const extremes = (trip.extremes||[]).length ? trip.extremes : findExtremes(dense, SPH);
   const tripSunTimes = calcSunTimes(new Date(trip.startTime));
-  drawGraph(canvas, dense, SPH, -999, extremes, [], tripSunTimes);
+
+  // Compute zoom range from trip start/end
+  let startMin = Math.max(0, minuteOfDay(trip.startTime) - 60);
+  let endMin   = Math.min(1440, minuteOfDay(trip.endTime) + 60);
+  if (endMin <= startMin) { startMin = 0; endMin = 1440; }
+  const zoomRange = { startMin, endMin };
+
+  drawGraph(canvas, dense, SPH, -999, extremes, [], tripSunTimes, zoomRange);
 
   const ctx  = canvas.getContext('2d');
   const W    = parseFloat(canvas.style.width);
   const PAD  = { top:20, right:16, bottom:38, left:46 };
   const GW   = W - PAD.left - PAD.right;
   const GH   = 240 - PAD.top - PAD.bottom;
-  const minV = Math.min(...dense);
-  const span = Math.max(...dense) - minV || 1;
-  const xOf  = mins => PAD.left + (mins / 1440) * GW;
+
+  // Fixed Y scale matching drawGraph
+  const FIXED_MIN = -100, FIXED_MAX = 350;
+  const minV = FIXED_MIN;
+  const span = FIXED_MAX - FIXED_MIN;
+
+  // Zoom-aware xOf
+  const xOf  = mins => PAD.left + ((mins - startMin) / (endMin - startMin)) * GW;
   const yOf  = v    => PAD.top  + GH - ((v - minV) / span) * GH;
   const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
 
@@ -3245,9 +3514,18 @@ function calcPersonalRecords() {
       const sp = rec.species;
       const date = new Date(trip.startTime).toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
       if (!map[sp] || rec.size > map[sp].size) {
-        map[sp] = { size: rec.size, date, photo: rec.photo || null };
+        map[sp] = { size: rec.size, date, photo: rec.photo || null, source: 'trip' };
       }
     });
+  });
+  // Merge manual records
+  const manualRecords = loadJSON(MANUAL_RECORDS_KEY, []);
+  manualRecords.forEach(rec => {
+    if (!rec.species || !rec.size) return;
+    const sp = rec.species;
+    if (!map[sp] || rec.size > map[sp].size) {
+      map[sp] = { size: rec.size, date: rec.date || '', photo: rec.photo || null, source: 'manual', location: rec.location || '' };
+    }
   });
   return map;
 }
@@ -3466,27 +3744,84 @@ function renderRecordsSection() {
   sec.innerHTML = '<div class="mypage-section-title">🏆 自己記録（魚種別最大サイズ）</div>';
   const records = calcPersonalRecords();
   const keys = Object.keys(records);
+
+  const listContainer = document.createElement('div');
   if (!keys.length) {
-    sec.innerHTML += '<div style="color:#3d6a88;font-size:14px;padding:8px 0;">まだ釣果記録がありません</div>';
-    return sec;
+    listContainer.innerHTML = '<div style="color:#3d6a88;font-size:14px;padding:8px 0;">まだ釣果記録がありません</div>';
+  } else {
+    // Sort by size desc
+    keys.sort((a, b) => records[b].size - records[a].size);
+    listContainer.innerHTML = keys.map(sp => {
+      const r = records[sp];
+      const thumb = r.photo
+        ? `<img src="${r.photo}" class="record-fish-photo" alt="釣果写真">`
+        : `<div class="record-fish-placeholder">🐟</div>`;
+      const sourceTag = r.source === 'manual'
+        ? '<span class="record-source-tag">✏️ 手動</span>'
+        : '<span class="record-source-tag">📋 潮録</span>';
+      const locStr = r.location ? `<div class="record-fish-date">${escHtml(r.location)}</div>` : '';
+      return `<div class="record-item-mypage">
+        ${thumb}
+        <div class="record-fish-info">
+          <div class="record-fish-species">${escHtml(sp)}${sourceTag}</div>
+          <div class="record-fish-size">${r.size} cm</div>
+          <div class="record-fish-date">${escHtml(r.date)}</div>
+          ${locStr}
+        </div>
+      </div>`;
+    }).join('');
   }
-  // Sort by size desc
-  keys.sort((a, b) => records[b].size - records[a].size);
-  const listHtml = keys.map(sp => {
-    const r = records[sp];
-    const thumb = r.photo
-      ? `<img src="${r.photo}" class="record-fish-photo" alt="釣果写真">`
-      : `<div class="record-fish-placeholder">🐟</div>`;
-    return `<div class="record-item-mypage">
-      ${thumb}
-      <div class="record-fish-info">
-        <div class="record-fish-species">${escHtml(sp)}</div>
-        <div class="record-fish-size">${r.size} cm</div>
-        <div class="record-fish-date">${r.date}</div>
-      </div>
-    </div>`;
-  }).join('');
-  sec.innerHTML += listHtml;
+  sec.appendChild(listContainer);
+
+  // ─ 手動記録追加ボタン ─
+  let manualFormEl = null;
+  const addManualBtn = document.createElement('button');
+  addManualBtn.className = 'btn-add-manual-record';
+  addManualBtn.textContent = '＋ 手動記録を追加';
+  addManualBtn.addEventListener('click', () => {
+    if (manualFormEl) { manualFormEl.remove(); manualFormEl = null; return; }
+    manualFormEl = document.createElement('div');
+    manualFormEl.className = 'manual-record-form';
+
+    // Species select
+    const speciesOptions = FISH_SPECIES.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+    manualFormEl.innerHTML = `
+      <label>魚種</label>
+      <input id="mr_species" list="mr_species_list" placeholder="魚種を入力または選択">
+      <datalist id="mr_species_list">${speciesOptions}</datalist>
+      <label>サイズ (cm)</label>
+      <input id="mr_size" type="number" min="1" max="300" placeholder="例: 42">
+      <label>釣行日</label>
+      <input id="mr_date" type="date">
+      <label>場所（任意）</label>
+      <input id="mr_loc" placeholder="例: 館山 城山公園下">
+      <button class="btn-preset-save" id="mr_save">保存</button>
+    `;
+    sec.insertBefore(manualFormEl, addManualBtn);
+
+    manualFormEl.querySelector('#mr_save').addEventListener('click', () => {
+      const species = manualFormEl.querySelector('#mr_species').value.trim();
+      const sizeVal = parseFloat(manualFormEl.querySelector('#mr_size').value);
+      const dateVal = manualFormEl.querySelector('#mr_date').value;
+      const locVal  = manualFormEl.querySelector('#mr_loc').value.trim();
+      if (!species) { alert('魚種を入力してください'); return; }
+      if (!sizeVal || sizeVal <= 0) { alert('サイズを入力してください'); return; }
+
+      const dateStr = dateVal
+        ? new Date(dateVal).toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' })
+        : new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' });
+
+      const arr = loadJSON(MANUAL_RECORDS_KEY, []);
+      arr.push({ species, size: sizeVal, date: dateStr, location: locVal, photo: null, source: 'manual' });
+      saveJSON(MANUAL_RECORDS_KEY, arr);
+      manualFormEl.remove(); manualFormEl = null;
+      // Re-render records section
+      const parent = sec.parentElement;
+      const newSec = renderRecordsSection();
+      parent.replaceChild(newSec, sec);
+    });
+  });
+  sec.appendChild(addManualBtn);
   return sec;
 }
 
