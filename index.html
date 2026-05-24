@@ -1149,6 +1149,112 @@ main { padding-bottom: 160px; }
   font-size: 11px; padding: 2px 6px; border-radius: 6px;
   background: #0d2035; color: #5a8aa8; margin-left: 6px;
 }
+
+/* ── 月間カレンダー ───────────────────────────────── */
+#calendarSection { padding-bottom: 4px; }
+.cal-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 0 10px;
+}
+.cal-month-label {
+  font-size: 18px; font-weight: 700; color: #e0f0ff; letter-spacing: 1px;
+}
+.cal-nav-btn {
+  background: none; border: none; color: #5ab0d8; font-size: 28px;
+  padding: 4px 10px; cursor: pointer; border-radius: 8px; line-height: 1;
+  transition: background 0.15s;
+}
+.cal-nav-btn:active { background: rgba(90,176,216,0.15); }
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px;
+}
+.cal-weekday {
+  text-align: center; font-size: 11px; color: #5a8aa8; padding: 2px 0 5px;
+}
+.cal-weekday:first-child { color: #d06060; }
+.cal-weekday:last-child  { color: #5ab0d8; }
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 3px;
+}
+.cal-cell {
+  background: #0d2038; border-radius: 8px; padding: 4px 2px 5px;
+  text-align: center; cursor: pointer; min-height: 76px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: background 0.15s; position: relative; overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.cal-cell:active { background: #1a3a5c; }
+.cal-cell.other-month { opacity: 0.22; pointer-events: none; }
+.cal-cell.today { background: #0a2e4a; outline: 2px solid #3a9fd8; outline-offset: -2px; }
+.cal-plan-dot { position: absolute; top: 3px; right: 4px; font-size: 10px; line-height: 1; }
+.cal-date-num { font-size: 13px; font-weight: 600; color: #c0d8f0; line-height: 1; margin-top: 2px; }
+.cal-cell.today .cal-date-num { color: #60d8ff; }
+.cal-cell.sun .cal-date-num   { color: #e07070; }
+.cal-cell.sat .cal-date-num   { color: #6098d0; }
+.cal-moon-icon { font-size: 13px; line-height: 1; }
+.cal-tide-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 4px;
+  border-radius: 4px; line-height: 1.3;
+}
+.cal-tide-badge.大潮 { background: #0f3a1c; color: #50d870; }
+.cal-tide-badge.中潮 { background: #0f2a3e; color: #50a0d0; }
+.cal-tide-badge.小潮 { background: #2a2a10; color: #c0a840; }
+.cal-tide-badge.長潮 { background: #2a102a; color: #c068c0; }
+.cal-tide-badge.若潮 { background: #2a1a10; color: #d08040; }
+.cal-stars { font-size: 9px; color: #e0c030; letter-spacing: -1px; line-height: 1; }
+
+/* ── カレンダー日別詳細モーダル ─────────────────── */
+#calDayModal .sheet {
+  max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  border-radius: 20px 20px 0 0;
+}
+.cal-day-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid #1a3a5c;
+}
+.cal-day-title-wrap { flex: 1; text-align: center; }
+.cal-day-title { font-size: 18px; font-weight: 700; color: #e0f0ff; }
+.cal-day-meta  { font-size: 12px; color: #5a8aa8; margin-top: 3px; }
+.cal-day-moon-lg { font-size: 32px; }
+.cal-day-body { padding: 12px 14px 28px; }
+.cal-info-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.cal-info-card {
+  flex: 1; background: #0d2038; border-radius: 10px; padding: 8px 6px; text-align: center;
+}
+.cal-info-label { font-size: 10px; color: #5a8aa8; margin-bottom: 3px; }
+.cal-info-value { font-size: 14px; font-weight: 700; color: #c8e0f0; }
+.cal-tide-table { background: #0d2038; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+.cal-tide-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #162d45;
+}
+.cal-tide-row:last-child { border-bottom: none; }
+.cal-tide-row-label { font-size: 11px; width: 44px; }
+.cal-tide-row-time  { color: #c8e0f0; font-weight: 600; }
+.cal-tide-row-ht    { color: #5ab0d8; font-size: 12px; }
+.cal-day-graph-wrap { background: #070f1c; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
+.cal-estimate-note {
+  font-size: 11px; color: #8a7840; background: #1a160a;
+  border: 1px solid #3a3010; border-radius: 8px;
+  padding: 6px 10px; margin-bottom: 10px; text-align: center;
+}
+.cal-chance-section { margin-bottom: 12px; }
+.cal-chance-title { font-size: 13px; font-weight: 700; color: #f0c040; margin-bottom: 6px; }
+.cal-chance-item {
+  font-size: 12px; color: #c8d0a0; padding: 4px 0;
+  border-bottom: 1px solid #1a2a1a;
+}
+.cal-chance-item:last-child { border-bottom: none; }
+.cal-plan-btn {
+  display: block; width: 100%; padding: 13px;
+  background: #0f2e4a; border: 1.5px solid #2a6a9a;
+  border-radius: 12px; color: #5ab0d8;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.cal-plan-btn:active { background: #1a4a6a; }
+.cal-plan-btn.is-planned { background: #0f3a1e; border-color: #2a8a4a; color: #50d870; }
 </style>
 </head>
 <body>
@@ -1200,6 +1306,22 @@ main { padding-bottom: 160px; }
     <div style="font-size:12px;color:#3d6a88;margin-top:6px;line-height:1.5;">満潮前後1時間〜下げ潮30%（グラフ上の金色帯）</div>
   </div>
 
+  <!-- ── 月間カレンダー ─────────────────────────────── -->
+  <div class="card" id="calendarSection">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="calPrevBtn">‹</button>
+      <span class="cal-month-label" id="calMonthLabel"></span>
+      <button class="cal-nav-btn" id="calNextBtn">›</button>
+    </div>
+    <div class="cal-weekdays">
+      <div class="cal-weekday">日</div><div class="cal-weekday">月</div>
+      <div class="cal-weekday">火</div><div class="cal-weekday">水</div>
+      <div class="cal-weekday">木</div><div class="cal-weekday">金</div>
+      <div class="cal-weekday">土</div>
+    </div>
+    <div id="calGrid" class="cal-grid"></div>
+  </div>
+
   <!-- ── 釣行スコアカード（釣行中のみ表示）── -->
   <div id="scoreArea" class="card hidden">
     <div class="score-row">
@@ -1226,6 +1348,21 @@ main { padding-bottom: 160px; }
     </div>
   </div>
 </main>
+
+<!-- ── カレンダー日別詳細モーダル ──────────────────── -->
+<div class="modal-overlay hidden" id="calDayModal">
+  <div class="sheet">
+    <div class="cal-day-hdr">
+      <button class="btn-close-catch" id="btnCalDayClose">✕</button>
+      <div class="cal-day-title-wrap">
+        <div class="cal-day-title" id="calDayTitle"></div>
+        <div class="cal-day-meta"  id="calDayMeta"></div>
+      </div>
+      <div class="cal-day-moon-lg" id="calDayMoon"></div>
+    </div>
+    <div class="cal-day-body" id="calDayBody"></div>
+  </div>
+</div>
 
 <!-- ── 釣果記録モーダル ───────────────────────────── -->
 <div class="catch-modal hidden" id="catchModal">
@@ -4065,6 +4202,334 @@ function openHistoryDetail(trip) {
     try { drawHistoryGraph(trip); } catch(e) { console.error(e); }
   }));
 }
+
+// ════════════════════════════════════════════════════
+//  月間カレンダー
+// ════════════════════════════════════════════════════
+
+const PLANS_KEY         = 'shioroku_plans';
+const CAL_REF_NEW_MOON  = Date.UTC(2000, 0, 6, 18, 14); // known new moon
+const CAL_SYNODIC       = 29.530588853 * 86400000;       // ms per lunar cycle
+
+function moonAge(date) {
+  const noon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  return ((noon.getTime() - CAL_REF_NEW_MOON) % CAL_SYNODIC + CAL_SYNODIC) % CAL_SYNODIC / 86400000;
+}
+
+function getMoonIcon(age) {
+  const a = age % 29.531;
+  if (a < 1.85)  return '🌑';
+  if (a < 5.55)  return '🌒';
+  if (a < 9.25)  return '🌓';
+  if (a < 12.95) return '🌔';
+  if (a < 16.65) return '🌕';
+  if (a < 20.35) return '🌖';
+  if (a < 24.05) return '🌗';
+  if (a < 27.75) return '🌘';
+  return '🌑';
+}
+
+function getTideTypeName(age) {
+  const d = Math.round(age) % 30;
+  if (d <= 2 || d >= 28)             return '大潮';
+  if (d >= 14 && d <= 16)            return '大潮';
+  if (d === 9  || d === 23)          return '長潮';
+  if (d === 10 || d === 24)          return '若潮';
+  if ((d >= 6 && d <= 8) || (d >= 20 && d <= 22)) return '小潮';
+  return '中潮';
+}
+
+// ★: 大潮(3)+近新月(1)+夕マズメ満潮(1) = max 5
+function getRecoScore(age, tideType, extremes) {
+  let score = tideType === '大潮' ? 3 : tideType === '中潮' ? 2 : 1;
+  const a = age % 29.531;
+  if (a <= 3 || a >= 27) score += 1; // near new moon (dark night)
+  if (extremes && extremes.some(e => e.type === 'high' && e.totalMinutes >= 960 && e.totalMinutes <= 1200))
+    score += 1; // high tide during evening magic hour (16-20h)
+  return Math.min(5, Math.max(1, score));
+}
+
+function getStars(score) {
+  return '★'.repeat(score) + '☆'.repeat(5 - score);
+}
+
+function loadPlans() {
+  try { return JSON.parse(localStorage.getItem(PLANS_KEY) || '[]'); }
+  catch { return []; }
+}
+function savePlans(p) { localStorage.setItem(PLANS_KEY, JSON.stringify(p)); }
+
+// ── JMA データキャッシュ ──────────────────────────
+const _jmaYearCache  = {};  // { '2025': [rawLine, ...] }
+const _calMonthCache = {};  // { '2025-4': [{dense,extremes,isEstimate}, ...] }
+
+async function getJMAYearLines(year) {
+  const key = String(year);
+  if (_jmaYearCache[key]) return _jmaYearCache[key];
+  const url = `https://www.data.jma.go.jp/kaiyou/data/db/tide/suisan/txt/${year}/${STATION}.txt`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const lines = (await res.text()).split('\n').filter(l => l.trim());
+  _jmaYearCache[key] = lines;
+  return lines;
+}
+
+function calEstimateDay(date) {
+  const values = approxTide(date);
+  const dense  = catmullRomInterpolate(values, SPH);
+  return { dense, extremes: findExtremes(dense, SPH), isEstimate: true };
+}
+
+async function getCalMonthData(year, month) {
+  const key = `${year}-${month}`;
+  if (_calMonthCache[key]) return _calMonthCache[key];
+
+  const now     = new Date();
+  const monthsDiff = (year - now.getFullYear()) * 12 + (month - now.getMonth());
+  const useJMA  = monthsDiff < 2;   // current month and next month use real data
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const result  = [];
+
+  if (useJMA) {
+    try {
+      const lines = await getJMAYearLines(year);
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dt   = new Date(year, month, d);
+        const line = lines[dayOfYear(dt) - 1];
+        if (line) {
+          const vals = parseLine(line);
+          if (vals) {
+            const dense = catmullRomInterpolate(vals, SPH);
+            result.push({ dense, extremes: findExtremes(dense, SPH), isEstimate: false });
+            continue;
+          }
+        }
+        result.push(calEstimateDay(dt));
+      }
+    } catch {
+      for (let d = 1; d <= daysInMonth; d++) result.push(calEstimateDay(new Date(year, month, d)));
+    }
+  } else {
+    for (let d = 1; d <= daysInMonth; d++) result.push(calEstimateDay(new Date(year, month, d)));
+  }
+
+  _calMonthCache[key] = result;
+  return result;
+}
+
+// ── カレンダー描画 ────────────────────────────────
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let _calGen  = 0;
+
+async function renderCalendar() {
+  const gen = ++_calGen;
+  const label = document.getElementById('calMonthLabel');
+  const grid  = document.getElementById('calGrid');
+  if (!label || !grid) return;
+
+  label.textContent = `${calYear}年${calMonth + 1}月`;
+
+  const today    = new Date();
+  const todayCmp = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const plans    = new Set(loadPlans());
+
+  const firstDow = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth  = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMo = new Date(calYear, calMonth, 0).getDate();
+
+  // Collect cells
+  const cells = [];
+  for (let i = 0; i < firstDow; i++)
+    cells.push({ other: true, day: daysInPrevMo - firstDow + 1 + i });
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date    = new Date(calYear, calMonth, d);
+    const age     = moonAge(date);
+    const dow     = date.getDay();
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells.push({
+      other: false, day: d, date, age, dow, dateStr,
+      tideType : getTideTypeName(age),
+      moonIcon : getMoonIcon(age),
+      isToday  : `${calYear}-${calMonth}-${d}` === todayCmp,
+      hasPlan  : plans.has(dateStr),
+    });
+  }
+  const trailing = (7 - cells.length % 7) % 7;
+  for (let i = 1; i <= trailing; i++) cells.push({ other: true, day: i });
+
+  grid.innerHTML = cells.map(c => {
+    if (c.other)
+      return `<div class="cal-cell other-month"><span class="cal-date-num">${c.day}</span></div>`;
+    const cls = ['cal-cell',
+      c.isToday ? 'today' : '',
+      c.dow === 0 ? 'sun' : c.dow === 6 ? 'sat' : '',
+    ].filter(Boolean).join(' ');
+    return `<div class="${cls}" onclick="openCalDay('${c.dateStr}')">
+      ${c.hasPlan ? `<span class="cal-plan-dot">🎣</span>` : ''}
+      <span class="cal-date-num">${c.day}</span>
+      <span class="cal-moon-icon">${c.moonIcon}</span>
+      <span class="cal-tide-badge ${c.tideType}">${c.tideType}</span>
+      <span class="cal-stars" id="cs-${c.dateStr}">…</span>
+    </div>`;
+  }).join('');
+
+  // Async: fill star ratings
+  try {
+    const monthData = await getCalMonthData(calYear, calMonth);
+    if (gen !== _calGen) return; // superseded
+    cells.filter(c => !c.other).forEach((c, i) => {
+      const el = document.getElementById(`cs-${c.dateStr}`);
+      if (!el) return;
+      const d = monthData[i];
+      el.textContent = d ? getStars(getRecoScore(c.age, c.tideType, d.extremes)) : '—';
+    });
+  } catch {
+    if (gen !== _calGen) return;
+    cells.filter(c => !c.other).forEach(c => {
+      const el = document.getElementById(`cs-${c.dateStr}`);
+      if (el) el.textContent = getStars(getRecoScore(c.age, c.tideType, null));
+    });
+  }
+}
+
+// ── 日別詳細モーダル ──────────────────────────────
+
+function fmtDecHr(h) {
+  return `${String(Math.floor(h)).padStart(2,'0')}:${String(Math.round((h % 1) * 60)).padStart(2,'0')}`;
+}
+
+async function openCalDay(dateStr) {
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const date      = new Date(yr, mo - 1, dy);
+  const age       = moonAge(date);
+  const tideType  = getTideTypeName(age);
+  const sunTimes  = calcSunTimes(date);
+  const dow       = ['日','月','火','水','木','金','土'][date.getDay()];
+
+  document.getElementById('calDayTitle').textContent = `${yr}年${mo}月${dy}日（${dow}）`;
+  document.getElementById('calDayMeta').textContent  = `${tideType}　月齢 ${Math.floor(age)} 日`;
+  document.getElementById('calDayMoon').textContent  = getMoonIcon(age);
+
+  const body = document.getElementById('calDayBody');
+  body.innerHTML = `<div style="text-align:center;padding:28px;color:#5a8aa8;">データ取得中…</div>`;
+  document.getElementById('calDayModal').classList.remove('hidden');
+
+  let dayData;
+  try {
+    const monthData = await getCalMonthData(yr, mo - 1);
+    dayData = monthData[dy - 1] || calEstimateDay(date);
+  } catch { dayData = calEstimateDay(date); }
+
+  const { dense, extremes, isEstimate } = dayData;
+  const score      = getRecoScore(age, tideType, extremes);
+  const isPlanned  = loadPlans().includes(dateStr);
+  const sortedExt  = [...extremes].sort((a, b) => a.totalMinutes - b.totalMinutes);
+  const highs      = extremes.filter(e => e.type === 'high');
+
+  // Chance bands for graph (±60min around high tides)
+  const chanceBands = highs.map(h => ({
+    startMin: Math.max(0,    h.totalMinutes - 60),
+    endMin:   Math.min(1440, h.totalMinutes + 60),
+  }));
+
+  // Chance time text
+  const chanceTimes = [];
+  highs.forEach(h => {
+    const m = h.totalMinutes;
+    if (m >= 300 && m <= 480)   chanceTimes.push(`🌅 朝マズメ満潮　${formatTime(m)}（${h.height}cm）`);
+    if (m >= 960 && m <= 1200)  chanceTimes.push(`🌇 夕マズメ満潮　${formatTime(m)}（${h.height}cm）`);
+  });
+  chanceTimes.push(`🌅 日の出前後　${fmtDecHr(sunTimes.rise)} 〜`);
+  chanceTimes.push(`🌇 日の入り前後　〜 ${fmtDecHr(sunTimes.set)}`);
+
+  function tideRowHTML(e) {
+    const isHigh = e.type === 'high';
+    return `<div class="cal-tide-row">
+      <span class="cal-tide-row-label" style="color:${isHigh?'#5ab0d8':'#8a9ab0'}">${isHigh?'▲ 満潮':'▼ 干潮'}</span>
+      <span class="cal-tide-row-time">${formatTime(e.totalMinutes)}</span>
+      <span class="cal-tide-row-ht">${e.height} cm</span>
+    </div>`;
+  }
+
+  const estNote = isEstimate
+    ? `<div class="cal-estimate-note">⚠ 翌々月以降は月齢からの推定値です。実際の潮汐と異なる場合があります。</div>` : '';
+
+  body.innerHTML = `
+    ${estNote}
+    <div class="cal-info-row">
+      <div class="cal-info-card">
+        <div class="cal-info-label">潮回り</div>
+        <div class="cal-info-value">${tideType}</div>
+      </div>
+      <div class="cal-info-card">
+        <div class="cal-info-label">おすすめ度</div>
+        <div class="cal-info-value" style="color:#e0c030;letter-spacing:-1px">${getStars(score)}</div>
+      </div>
+      <div class="cal-info-card">
+        <div class="cal-info-label">月齢</div>
+        <div class="cal-info-value">${Math.floor(age)} 日</div>
+      </div>
+    </div>
+    <div class="cal-info-row">
+      <div class="cal-info-card">
+        <div class="cal-info-label">☀ 日の出</div>
+        <div class="cal-info-value">${fmtDecHr(sunTimes.rise)}</div>
+      </div>
+      <div class="cal-info-card">
+        <div class="cal-info-label">🌙 日の入り</div>
+        <div class="cal-info-value">${fmtDecHr(sunTimes.set)}</div>
+      </div>
+    </div>
+    <div class="cal-tide-table">${sortedExt.map(tideRowHTML).join('')}</div>
+    <div class="cal-day-graph-wrap">
+      <canvas class="cal-day-graph" id="calDayGraph"></canvas>
+    </div>
+    <div class="cal-chance-section">
+      <div class="cal-chance-title">⭐ おすすめチャンスタイム</div>
+      ${chanceTimes.map(t => `<div class="cal-chance-item">${t}</div>`).join('')}
+    </div>
+    <button class="cal-plan-btn${isPlanned?' is-planned':''}" id="calPlanBtn" onclick="toggleCalPlan('${dateStr}')">
+      ${isPlanned ? '✓ 釣行予定に登録済み（タップで解除）' : '🎣 この日に釣行予定を入れる'}
+    </button>
+  `;
+
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('calDayGraph');
+    if (canvas && dense) {
+      try { drawGraph(canvas, dense, SPH, -999, extremes, chanceBands, sunTimes); }
+      catch(e) { console.warn('calDayGraph:', e); }
+    }
+  });
+}
+
+function toggleCalPlan(dateStr) {
+  const plans = loadPlans();
+  const idx = plans.indexOf(dateStr);
+  if (idx >= 0) plans.splice(idx, 1); else plans.push(dateStr);
+  savePlans(plans);
+  const isPlanned = plans.includes(dateStr);
+  const btn = document.getElementById('calPlanBtn');
+  if (btn) {
+    btn.className = `cal-plan-btn${isPlanned ? ' is-planned' : ''}`;
+    btn.textContent = isPlanned ? '✓ 釣行予定に登録済み（タップで解除）' : '🎣 この日に釣行予定を入れる';
+  }
+  renderCalendar();
+}
+
+document.getElementById('calPrevBtn').addEventListener('click', () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+document.getElementById('calNextBtn').addEventListener('click', () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+document.getElementById('btnCalDayClose').addEventListener('click', () => {
+  document.getElementById('calDayModal').classList.add('hidden');
+});
+
+renderCalendar();
 </script>
 </body>
 </html>
