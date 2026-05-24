@@ -1,0 +1,10 @@
+# GitHub トークン（絶対にコミットしない）
+.github_token
+
+# macOS
+.DS_Store
+
+# エディタ
+*.swp
+.idea/
+.vscode/
