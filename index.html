@@ -1005,6 +1005,15 @@ main { padding-bottom: 160px; }
 
 .hidden { display: none !important; }
 
+/* ── INLINE PAGES (myPage / historyList) ─────── */
+#myPage, #historyList {
+  display: flex;
+  flex-direction: column;
+  background: #060f1c;
+  min-height: calc(100vh - env(safe-area-inset-bottom));
+}
+#myPage.hidden, #historyList.hidden { display: none; }
+
 /* ── MY PAGE ──────────────────────────────────── */
 .mypage-section { margin-bottom: 24px; }
 .feedback-section { text-align: center; padding: 8px 0 4px; }
@@ -1424,6 +1433,16 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
       <div class="no-records">まだ釣果がありません</div>
     </div>
   </div>
+
+  <!-- ── フィードバック ── -->
+  <div class="card feedback-section" id="feedbackCard">
+    <p class="feedback-msg">皆さまのご意見でどんどん改善します！</p>
+    <a class="btn-feedback"
+       href="https://docs.google.com/forms/d/e/1FAIpQLScefKpg5N_tztwdm9vqVY-kmulEW5_FwcBy0hmhyFgx2FNO2A/viewform?usp=publish-editor"
+       target="_blank" rel="noopener">
+      💬 ご意見・ご要望を送る
+    </a>
+  </div>
 </main>
 
 <!-- ── エリア選択シート ──────────────────────────── -->
@@ -1703,9 +1722,9 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
 </div>
 
 <!-- ── 過去の釣行 一覧 ──────────────────────────── -->
-<div class="catch-modal hidden" id="historyList" style="z-index:400;">
+<div class="hidden" id="historyList">
   <div class="catch-hdr">
-    <button class="btn-close-catch" id="btnCloseHistory">✕</button>
+    <div style="width:44px"></div>
     <span class="catch-title">過去の釣行</span>
     <div style="width:44px"></div>
   </div>
@@ -1752,13 +1771,13 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
 </nav>
 
 <!-- ── マイページ ────────────────────────────────── -->
-<div class="catch-modal hidden" id="myPage" style="z-index:350;">
+<div class="hidden" id="myPage">
   <div class="catch-hdr">
-    <button class="btn-close-catch" id="btnCloseMyPage" onclick="navigateTo('home')">✕</button>
+    <div style="width:44px"></div>
     <span class="catch-title">マイページ</span>
     <div style="width:44px"></div>
   </div>
-  <div class="catch-body" id="myPageBody" style="padding-bottom:24px;">
+  <div class="catch-body" id="myPageBody">
     <!-- rendered by JS -->
   </div>
 </div>
@@ -2490,13 +2509,17 @@ function hideSetupPage() {
   document.querySelector('main').style.display = '';
 }
 
+function showMainPage() {
+  document.querySelector('main').style.display = '';
+  document.getElementById('myPage').classList.add('hidden');
+  document.getElementById('historyList').classList.add('hidden');
+  document.getElementById('setupModal').classList.add('hidden');
+}
+
 function navigateTo(page) {
   if (page === 'start') {
     if (session.active) {
-      // 釣行中はホームへ戻る（セッションコントロールがある）
-      hideSetupPage();
-      document.getElementById('myPage').classList.add('hidden');
-      document.getElementById('historyList').classList.add('hidden');
+      showMainPage();
       currentNav = 'home';
       updateNavTabs();
       return;
@@ -2505,23 +2528,27 @@ function navigateTo(page) {
     return;
   }
   if (page === 'history') {
-    hideSetupPage();
+    document.getElementById('setupModal').classList.add('hidden');
+    document.getElementById('myPage').classList.add('hidden');
+    document.querySelector('main').style.display = 'none';
     openHistoryList();
+    currentNav = 'history';
+    updateNavTabs();
     return;
   }
   if (page === 'mypage') {
-    hideSetupPage();
-    currentNav = 'mypage';
+    document.getElementById('setupModal').classList.add('hidden');
+    document.getElementById('historyList').classList.add('hidden');
+    document.querySelector('main').style.display = 'none';
     document.getElementById('myPage').classList.remove('hidden');
     renderMyPage();
+    currentNav = 'mypage';
     updateNavTabs();
     return;
   }
   if (page === 'home') {
-    hideSetupPage();
+    showMainPage();
     currentNav = 'home';
-    document.getElementById('myPage').classList.add('hidden');
-    document.getElementById('historyList').classList.add('hidden');
     updateNavTabs();
     return;
   }
@@ -3446,6 +3473,10 @@ function openHistoryList() {
   document.getElementById('historyList').classList.remove('hidden');
 }
 
+function closeHistoryList() {
+  navigateTo('home');
+}
+
 function renderHistoryList() {
   const trips = loadTrips();
   const body  = document.getElementById('historyListBody');
@@ -3493,9 +3524,6 @@ function renderHistoryList() {
   });
 }
 
-document.getElementById('btnCloseHistory').addEventListener('click', () => {
-  document.getElementById('historyList').classList.add('hidden');
-});
 
 document.getElementById('btnBackToList').addEventListener('click', () => {
   document.getElementById('historyDetail').classList.add('hidden');
@@ -3841,18 +3869,6 @@ function renderMyPage() {
   body.appendChild(renderChumSection());
   // ─ 自己記録 ─
   body.appendChild(renderRecordsSection());
-  // ─ フィードバック ─
-  const fb = document.createElement('div');
-  fb.className = 'mypage-section feedback-section';
-  fb.innerHTML = `
-    <p class="feedback-msg">皆さまのご意見でどんどん改善します！</p>
-    <a class="btn-feedback"
-       href="https://docs.google.com/forms/d/e/1FAIpQLScefKpg5N_tztwdm9vqVY-kmulEW5_FwcBy0hmhyFgx2FNO2A/viewform?usp=publish-editor"
-       target="_blank" rel="noopener">
-      💬 ご意見・ご要望を送る
-    </a>
-  `;
-  body.appendChild(fb);
 }
 
 function renderTackleSection() {
