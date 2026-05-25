@@ -1007,6 +1007,22 @@ main { padding-bottom: 160px; }
 
 /* ── MY PAGE ──────────────────────────────────── */
 .mypage-section { margin-bottom: 24px; }
+.feedback-section { text-align: center; padding: 8px 0 4px; }
+.feedback-msg {
+  font-size: 14px; color: #7ecef0; margin-bottom: 12px; line-height: 1.5;
+}
+.btn-feedback {
+  display: block; width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #1a5276, #2e8fd1);
+  border-radius: 14px; border: none;
+  color: #fff; font-size: 18px; font-weight: 700;
+  text-decoration: none; text-align: center;
+  box-shadow: 0 4px 18px rgba(46,143,209,.45);
+  letter-spacing: 1px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.btn-feedback:active { opacity: 0.8; }
 .mypage-section-title {
   font-size: 15px; font-weight: 700; color: #7ecef0;
   margin-bottom: 12px; padding-bottom: 8px;
@@ -3825,6 +3841,18 @@ function renderMyPage() {
   body.appendChild(renderChumSection());
   // ─ 自己記録 ─
   body.appendChild(renderRecordsSection());
+  // ─ フィードバック ─
+  const fb = document.createElement('div');
+  fb.className = 'mypage-section feedback-section';
+  fb.innerHTML = `
+    <p class="feedback-msg">皆さまのご意見でどんどん改善します！</p>
+    <a class="btn-feedback"
+       href="https://docs.google.com/forms/d/e/1FAIpQLScefKpg5N_tztwdm9vqVY-kmulEW5_FwcBy0hmhyFgx2FNO2A/viewform?usp=publish-editor"
+       target="_blank" rel="noopener">
+      💬 ご意見・ご要望を送る
+    </a>
+  `;
+  body.appendChild(fb);
 }
 
 function renderTackleSection() {
