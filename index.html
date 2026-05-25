@@ -61,7 +61,7 @@ header {
 main {
   max-width: 820px;
   margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 10px 12px calc(72px + 64px + env(safe-area-inset-bottom));
 }
 
 /* ── CARD ────────────────────────────────────────────── */
@@ -1005,6 +1005,22 @@ main { padding-bottom: 160px; }
 
 .hidden { display: none !important; }
 
+/* ── 今日のコンパクト潮情報カード（非表示）────── */
+#todayCompactCard { display: none !important; }
+
+/* ── フィードバックボタン固定 ─────────────────── */
+#feedbackCard {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  z-index: 590;
+  margin: 0;
+  border-radius: 0;
+  border-left: none; border-right: none; border-top: 1px solid #1b3a58;
+  padding: 10px 16px;
+}
+#feedbackCard .feedback-msg { display: none; }
+
 /* ── INLINE PAGES (myPage / historyList) ─────── */
 #myPage, #historyList {
   display: flex;
@@ -1167,7 +1183,7 @@ main { padding-bottom: 160px; }
 /* ── エリアインジケーター ────────────────────────── */
 .area-indicator {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 6px 0 10px; margin-bottom: 8px;
+  padding: 2px 0 6px; margin-bottom: 4px;
   border-bottom: 1px solid #1a3a5c; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1251,35 +1267,35 @@ main { padding-bottom: 160px; }
 .cal-day-title-block { flex: 1; text-align: center; min-width: 0; }
 
 /* ── 月間カレンダー ───────────────────────────────── */
-#calendarSection { padding-bottom: 4px; }
+#calendarSection { padding: 10px 12px 8px; margin-bottom: 0; }
 .cal-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 2px 0 10px;
+  padding: 0 0 5px;
 }
 .cal-month-label {
   font-size: 18px; font-weight: 700; color: #e0f0ff; letter-spacing: 1px;
 }
 .cal-nav-btn {
   background: none; border: none; color: #5ab0d8; font-size: 28px;
-  padding: 4px 10px; cursor: pointer; border-radius: 8px; line-height: 1;
+  padding: 1px 8px; cursor: pointer; border-radius: 8px; line-height: 1;
   transition: background 0.15s;
 }
 .cal-nav-btn:active { background: rgba(90,176,216,0.15); }
 .cal-weekdays {
-  display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px;
+  display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 2px;
 }
 .cal-weekday {
-  text-align: center; font-size: 11px; color: #5a8aa8; padding: 2px 0 5px;
+  text-align: center; font-size: 11px; color: #5a8aa8; padding: 1px 0 2px;
 }
 .cal-weekday:first-child { color: #d06060; }
 .cal-weekday:last-child  { color: #5ab0d8; }
 .cal-grid {
-  display: grid; grid-template-columns: repeat(7,1fr); gap: 3px;
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 2px;
 }
 .cal-cell {
-  background: #0d2038; border-radius: 8px; padding: 5px 2px 6px;
-  text-align: center; cursor: pointer; min-height: 96px;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: #0d2038; border-radius: 6px; padding: 3px 2px 4px;
+  text-align: center; cursor: pointer; min-height: 68px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
   transition: background 0.15s; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
