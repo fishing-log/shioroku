@@ -578,7 +578,7 @@ main { padding-bottom: 160px; }
   -webkit-overflow-scrolling: touch;
 }
 .catch-ftr {
-  padding: 12px 16px calc(12px + 64px + env(safe-area-inset-bottom));
+  padding: 14px 16px calc(16px + 64px + env(safe-area-inset-bottom));
   border-top: 1px solid #1b3a58;
   background: #0b1f36;
   flex-shrink: 0;
@@ -1013,13 +1013,101 @@ main { padding-bottom: 160px; }
   position: fixed;
   bottom: calc(64px + env(safe-area-inset-bottom));
   left: 0; right: 0;
-  z-index: 590;
+  z-index: 100;
   margin: 0;
   border-radius: 0;
   border-left: none; border-right: none; border-top: 1px solid #1b3a58;
   padding: 10px 16px;
 }
 #feedbackCard .feedback-msg { display: none; }
+
+/* ── 釣行中ページ ────────────────────────────── */
+#sessionPage {
+  position: fixed; inset: 0; z-index: 250;
+  background: #060f1c;
+  display: flex; flex-direction: column;
+}
+#sessionPage.hidden { display: none; }
+.session-page-hdr {
+  background: #0b1f36; border-bottom: 1px solid #1b3a58;
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.session-page-back {
+  background: none; border: none; color: #5a8aa8;
+  font-size: 15px; cursor: pointer; padding: 2px 6px; font-family: inherit;
+}
+.session-page-title { font-size: 17px; font-weight: 700; color: #7ecef0; }
+#sessionPageTime { font-size: 13px; color: #5a8aa8; }
+.session-page-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 14px 14px 0;
+}
+#sessionTideCanvas {
+  width: 100%; height: 200px; display: block;
+  background: #070f1c; border-radius: 10px;
+}
+.session-tide-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid #162d45; font-size: 15px;
+}
+.session-tide-row:last-child { border-bottom: none; }
+.session-page-ftr {
+  flex-shrink: 0;
+  padding: 10px 12px calc(10px + 64px + env(safe-area-inset-bottom));
+  background: #0b1f36; border-top: 1px solid #1b3a58;
+  display: flex; gap: 8px;
+}
+.btn-sess-catch {
+  flex: 2; padding: 15px 8px; font-size: 17px; font-weight: 700;
+  background: linear-gradient(135deg, #b03030, #e74c3c);
+  color: #fff; border: none; border-radius: 12px; cursor: pointer;
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+.btn-sess-barra {
+  flex: 1.5; padding: 15px 8px; font-size: 15px; font-weight: 700;
+  background: #0f3a5a; border: 1.5px solid #2e8fd1;
+  color: #7ecef0; border-radius: 12px; cursor: pointer;
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+.btn-sess-end {
+  flex: 1.5; padding: 15px 8px; font-size: 14px; font-weight: 700;
+  background: #1a1430; border: 1.5px solid #6040a0;
+  color: #c090e0; border-radius: 12px; cursor: pointer;
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+
+/* ── セットアップ用ドラムロール（コンパクト）──── */
+.setup-drum-wrap {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  height: 132px; position: relative; overflow: hidden;
+}
+.setup-drum-wrap::before, .setup-drum-wrap::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 42px; z-index: 2; pointer-events: none;
+}
+.setup-drum-wrap::before { top: 0; background: linear-gradient(#0d1f35, transparent); }
+.setup-drum-wrap::after  { bottom: 0; background: linear-gradient(transparent, #0d1f35); }
+.setup-drum-roll {
+  height: 132px; overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -ms-overflow-style: none; scrollbar-width: none;
+  width: 80px; position: relative; z-index: 1;
+}
+.setup-drum-roll::-webkit-scrollbar { display: none; }
+.setup-drum-item {
+  height: 44px; display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: center;
+  font-size: 24px; font-weight: 700; color: #c8e0f0;
+}
+
+/* ── ウキ その他入力 ─────────────────────────── */
+.float-other-input {
+  width: 100%; margin-top: 8px; padding: 10px 12px;
+  background: #0a1c30; border: 1px solid #1b3a58; border-radius: 10px;
+  color: #c0d8f0; font-size: 15px; font-family: inherit;
+  placeholder-color: #3a6a88;
+}
 
 /* ── INLINE PAGES (myPage / historyList) ─────── */
 #myPage, #historyList {
@@ -1553,6 +1641,24 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
   </div>
 </main>
 
+<!-- ── 釣行中ページ ───────────────────────────────── -->
+<div id="sessionPage" class="hidden">
+  <div class="session-page-hdr">
+    <button class="session-page-back" onclick="closeSessionPage()">← ホーム</button>
+    <span class="session-page-title">🎣 釣行中</span>
+    <span id="sessionPageTime"></span>
+  </div>
+  <div class="session-page-body">
+    <canvas id="sessionTideCanvas"></canvas>
+    <div id="sessionTideInfo" style="background:#0d2038;border-radius:10px;overflow:hidden;margin-top:10px;"></div>
+  </div>
+  <div class="session-page-ftr">
+    <button class="btn-sess-catch" id="btnSessCatch">🐟 釣れた！</button>
+    <button class="btn-sess-barra" id="btnSessBarra">😢 バラシ</button>
+    <button class="btn-sess-end"   id="btnSessEnd">🏁 終了</button>
+  </div>
+</div>
+
 <!-- ── エリア選択シート ──────────────────────────── -->
 <div class="modal-overlay hidden" id="areaSheet">
   <div class="sheet">
@@ -1957,6 +2063,8 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
           <div class="chip"     data-val="棒ウキ">棒ウキ</div>
           <div class="chip"     data-val="円錐ウキ">円錐ウキ</div>
         </div>
+        <input class="float-other-input" id="floatOtherInput" type="text"
+               placeholder="その他・自由記入（例：遠投6B ピン打ち）" autocomplete="off">
       </div>
 
       <!-- ウキ 浮力 -->
@@ -1980,18 +2088,10 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
       <!-- ハリス -->
       <div class="sec">
         <div class="sec-lbl">ハリス（号）</div>
-        <div class="chip-group" id="chipLeader">
-          <div class="chip"     data-val="1">1</div>
-          <div class="chip sel" data-val="1.5">1.5</div>
-          <div class="chip"     data-val="1.75">1.75</div>
-          <div class="chip"     data-val="2">2</div>
-          <div class="chip"     data-val="2.5">2.5</div>
-          <div class="chip"     data-val="3">3</div>
-          <div class="chip"     data-val="4">4</div>
-          <div class="chip"     data-val="5">5</div>
-          <div class="chip"     data-val="6">6</div>
-          <div class="chip"     data-val="7">7</div>
-          <div class="chip"     data-val="8">8</div>
+        <div class="setup-drum-wrap">
+          <div class="drum-highlight"></div>
+          <div class="setup-drum-roll" id="leaderRoll"></div>
+          <div class="drum-unit">号</div>
         </div>
       </div>
 
@@ -2007,10 +2107,10 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
       <!-- ハリ 号数 -->
       <div class="sec">
         <div class="sec-lbl">ハリ 号数</div>
-        <div class="stepper">
-          <button class="step-btn" id="hookMinus">−</button>
-          <div class="step-val"   id="hookSizeVal">6号</div>
-          <button class="step-btn" id="hookPlus">＋</button>
+        <div class="setup-drum-wrap">
+          <div class="drum-highlight"></div>
+          <div class="setup-drum-roll" id="hookSizeRoll"></div>
+          <div class="drum-unit">号</div>
         </div>
       </div>
 
@@ -2053,10 +2153,10 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
       <!-- 水温 -->
       <div class="sec">
         <div class="sec-lbl">水温</div>
-        <div class="temp-row">
-          <input class="temp-input" id="waterTempInput"
-                 type="number" step="0.5" min="0" max="35" placeholder="—">
-          <span class="temp-unit">℃</span>
+        <div class="setup-drum-wrap">
+          <div class="drum-highlight"></div>
+          <div class="setup-drum-roll" id="waterTempRoll"></div>
+          <div class="drum-unit">℃</div>
         </div>
       </div>
 
@@ -2624,9 +2724,10 @@ const session = {
     tackle:      '重タックル 3号',
     floatType:   '自作',
     buoyancy:    '0',
-    leader:      '1.5',
+    leader:      '2.0',
     hookType:    'グレバリ',
-    hookSize:    6,
+    hookSize:    5,
+    floatOther:  '',
     bait:        'オキアミL',
     chum:        new Set(['オキアミ3kg']),
     chumMemo:    '',
@@ -2668,6 +2769,7 @@ function showSetupPage() {
   document.getElementById('historyList').classList.add('hidden');
   document.getElementById('setupModal').classList.remove('hidden');
   applyMyPagePresetsToSetup();
+  initSetupDrums();
   // sync picker bar labels
   const bv = document.getElementById('baitPickerVal');
   if (bv) bv.textContent = (session.setup.bait || 'オキアミL') + ' ▼';
@@ -2691,6 +2793,7 @@ function showMainPage() {
   document.getElementById('historyList').classList.add('hidden');
   document.getElementById('setupModal').classList.add('hidden');
   document.getElementById('historyDetail').classList.add('hidden');
+  document.getElementById('sessionPage').classList.add('hidden');
 }
 
 function navigateTo(page) {
@@ -2795,11 +2898,17 @@ function startSession() {
   document.getElementById('sessionStartLabel').textContent =
     `釣行中  開始 ${hh}:${mm}`;
 
+  // read drum roll values before setup page closes
+  session.setup.leader    = getSetupDrum('leaderRoll',   LEADER_VALS);
+  session.setup.hookSize  = Number(getSetupDrum('hookSizeRoll', HOOK_VALS));
+  session.setup.waterTemp = getSetupDrum('waterTempRoll', WATER_TEMP_VALS);
+  session.setup.floatOther = (document.getElementById('floatOtherInput') || {}).value || '';
+
   updateScore();
   updateElapsed();
   session.elapsedTimer = setInterval(updateElapsed, 30000);
   applyState();
-  openCatchModal();
+  openSessionPage();
 }
 
 // ── 釣行終了 ────────────────────────────────────
@@ -2838,30 +2947,15 @@ function flashBtn(id) {
   setTimeout(() => { el.style.transform = ''; }, 160);
 }
 
-// ── ハリ号数ステッパー ──────────────────────────
-document.getElementById('hookMinus').addEventListener('click', () => {
-  if (session.setup.hookSize > 5) {
-    session.setup.hookSize--;
-    document.getElementById('hookSizeVal').textContent = session.setup.hookSize + '号';
-  }
-});
-document.getElementById('hookPlus').addEventListener('click', () => {
-  if (session.setup.hookSize < 12) {
-    session.setup.hookSize++;
-    document.getElementById('hookSizeVal').textContent = session.setup.hookSize + '号';
-  }
-});
-
-// ── 水温テキスト入力 ───────────────────────────
-document.getElementById('waterTempInput').addEventListener('input', e => {
-  session.setup.waterTemp = e.target.value;
+// ── ウキ その他入力 ────────────────────────────
+document.getElementById('floatOtherInput').addEventListener('input', e => {
+  session.setup.floatOther = e.target.value;
 });
 
 // ── チップバインド ──────────────────────────────
 bindChips('chipTackle',    'tackle');
 bindChips('chipFloatType', 'floatType');
 bindChips('chipBuoyancy',  'buoyancy');
-bindChips('chipLeader',    'leader');
 bindChips('chipHookType',  'hookType');
 bindChips('chipBait',      'bait');
 bindChips('chipChum',      'chum', true);
@@ -2997,8 +3091,109 @@ function getTideInfoNow() {
   return { height: h, phase, rising };
 }
 
-// ── ドラムロール サイズ選択 ─────────────────────
+// ── 汎用ドラムロールヘルパー ─────────────────────
 const DRUM_ITEM_H = 44;
+
+function initSetupDrum(rollId, values, defVal, itemClass) {
+  const cls  = itemClass || 'setup-drum-item';
+  const roll = document.getElementById(rollId);
+  if (!roll || roll.childElementCount > 0) return;
+  for (let i = 0; i < 1; i++) {
+    const sp = document.createElement('div'); sp.className = cls; roll.appendChild(sp);
+  }
+  values.forEach(v => {
+    const d = document.createElement('div');
+    d.className = cls; d.textContent = v; d.dataset.val = v;
+    roll.appendChild(d);
+  });
+  for (let i = 0; i < 1; i++) {
+    const sp = document.createElement('div'); sp.className = cls; roll.appendChild(sp);
+  }
+  setSetupDrum(rollId, values, defVal);
+}
+
+function setSetupDrum(rollId, values, val) {
+  const roll = document.getElementById(rollId);
+  if (!roll) return;
+  const idx = values.findIndex(v => String(v) === String(val));
+  roll.scrollTop = (idx >= 0 ? idx + 1 : 1) * DRUM_ITEM_H;
+}
+
+function getSetupDrum(rollId, values) {
+  const roll = document.getElementById(rollId);
+  if (!roll) return values[0];
+  const idx = Math.round(roll.scrollTop / DRUM_ITEM_H) - 1;
+  return values[Math.min(values.length - 1, Math.max(0, idx))];
+}
+
+const LEADER_VALS    = ['0.5','1.0','1.5','2.0','2.5','3.0','3.5','4.0','4.5','5.0','5.5','6.0'];
+const HOOK_VALS      = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'];
+const WATER_TEMP_VALS = (() => {
+  const arr = [];
+  for (let v = 10.0; v <= 35.0; v = Math.round((v + 0.5) * 10) / 10) arr.push(v.toFixed(1));
+  return arr;
+})();
+
+function initSetupDrums() {
+  initSetupDrum('leaderRoll',   LEADER_VALS,    '2.0');
+  initSetupDrum('hookSizeRoll', HOOK_VALS,      '5');
+  initSetupDrum('waterTempRoll', WATER_TEMP_VALS, '20.0');
+}
+
+// ── 釣行中ページ ─────────────────────────────────
+function openSessionPage() {
+  const page = document.getElementById('sessionPage');
+  page.classList.remove('hidden');
+  const st = session.startTime;
+  const hh = String(new Date(st).getHours()).padStart(2,'0');
+  const mm = String(new Date(st).getMinutes()).padStart(2,'0');
+  document.getElementById('sessionPageTime').textContent = `開始 ${hh}:${mm}`;
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('sessionTideCanvas');
+    if (!canvas) return;
+    const W = canvas.offsetWidth;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = W * dpr;
+    canvas.height = 200 * dpr;
+    if (tideData.dense && tideData.dense.length) {
+      const now  = today();
+      const nowH = now.getHours() + now.getMinutes() / 60;
+      try {
+        drawGraph(canvas, tideData.dense, SPH, nowH,
+                  tideData.extremes, null, tideData.sunTimes, null);
+      } catch(e) {}
+    }
+    const info = document.getElementById('sessionTideInfo');
+    if (info && tideData.extremes && tideData.extremes.length) {
+      info.innerHTML = tideData.extremes.slice(0,4).map(e => {
+        const h = Math.floor(e.hour), m = String(Math.round((e.hour-h)*60)).padStart(2,'0');
+        const label = e.type === 'high' ? '🔺 満潮' : '🔻 干潮';
+        const col   = e.type === 'high' ? '#5ab0d8' : '#8aa0b8';
+        return `<div class="session-tide-row">
+          <span style="color:${col}">${label}</span>
+          <span style="color:#c8e0f0;font-weight:700;">${String(h).padStart(2,'0')}:${m}</span>
+          <span style="color:#7ecef0;">${Math.round(e.height)} cm</span>
+        </div>`;
+      }).join('');
+    }
+  });
+}
+
+function closeSessionPage() {
+  document.getElementById('sessionPage').classList.add('hidden');
+  showMainPage();
+  currentNav = 'home';
+  updateNavTabs();
+}
+
+document.getElementById('btnSessCatch').addEventListener('click', openCatchModal);
+document.getElementById('btnSessBarra').addEventListener('click', openBarraModal);
+document.getElementById('btnSessEnd').addEventListener('click', () => {
+  endSession();
+  closeSessionPage();
+});
+
+// ── ドラムロール サイズ選択 ─────────────────────
 const DRUM_MIN    = 1;
 const DRUM_MAX    = 150;
 const DRUM_DEF    = 30;
