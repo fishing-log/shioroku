@@ -1792,7 +1792,10 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
     <div class="fish-chip" data-val="イスズミ">イスズミ</div>
     <div class="fish-chip" data-val="ウツボ">ウツボ</div>
     <div class="fish-chip" data-val="その他">その他</div>
+    <div class="fish-chip" data-val="その他（直接入力）" style="grid-column:span 2;">その他（直接入力）</div>
   </div>
+  <input class="float-other-input hidden" id="fishOtherInput" type="text"
+         placeholder="魚種名を直接入力（例：アジ、マルアジ）" autocomplete="off" style="margin-top:8px;">
 </div>
 
 <!-- ── 付け餌選択シート ───────────────────────────── -->
@@ -2036,6 +2039,8 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
           <div class="chip sel" data-val="重タックル 3号">重タックル 3号</div>
           <div class="chip"     data-val="軽タックル 1.25号">軽タックル 1.25号</div>
         </div>
+        <input class="float-other-input hidden" id="tackleManualInput" type="text"
+               placeholder="タックル名を直接入力（例：磯竿3号 BB-Xセット）" autocomplete="off">
       </div>
 
       <!-- ウキ・ハリス・針設定 -->
@@ -2069,7 +2074,11 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
         <div class="chip-group" id="chipHookType">
           <div class="chip sel" data-val="グレバリ">グレバリ</div>
           <div class="chip"     data-val="チヌバリ">チヌバリ</div>
+          <div class="chip"     data-val="マダイバリ">マダイバリ</div>
+          <div class="chip"     data-val="手動入力">手動入力</div>
         </div>
+        <input class="float-other-input hidden" id="hookTypeManualInput" type="text"
+               placeholder="針の種類を直接入力（例：グレバリ改）" autocomplete="off">
       </div>
 
       <!-- ハリ 号数 -->
@@ -2105,7 +2114,8 @@ canvas.cal-day-graph { width: 100%; height: 130px; display: block; }
           <div class="chip"     data-val="V9">V9</div>
           <div class="chip"     data-val="V10">V10</div>
         </div>
-        <input class="chum-manual-input" id="chumManualInput" type="text"
+        <button class="chip" id="btnChumManual" style="margin-top:8px;">✏️ 手動入力</button>
+        <input class="chum-manual-input hidden" id="chumManualInput" type="text"
                placeholder="その他・メモ（例：グレパン2袋+V9）" autocomplete="off">
       </div>
 
@@ -2670,6 +2680,12 @@ async function init() {
   if (moonEl) moonEl.textContent = getMoonIcon(todayAge);
 
   updateAreaLabel();
+
+  if (session.active && _pendingRestoreNotice) {
+    _pendingRestoreNotice = false;
+    openSessionPage();
+    showRestoreNotice();
+  }
 }
 
 init();
@@ -2742,7 +2758,14 @@ function showSetupPage() {
   const bv = document.getElementById('baitPickerVal');
   if (bv) bv.textContent = (session.setup.bait || 'オキアミL') + ' ▼';
   const ci = document.getElementById('chumManualInput');
-  if (ci) ci.value = session.setup.chumMemo || '';
+  if (ci) {
+    ci.value = session.setup.chumMemo || '';
+    if (session.setup.chumMemo) {
+      ci.classList.remove('hidden');
+      const chumBtn = document.getElementById('btnChumManual');
+      if (chumBtn) chumBtn.classList.add('sel');
+    }
+  }
   fetchGPS();
   currentNav = 'start';
   updateNavTabs();
@@ -2874,6 +2897,7 @@ function startSession() {
   updateScore();
   updateElapsed();
   session.elapsedTimer = setInterval(updateElapsed, 30000);
+  saveActiveSession();
   applyState();
   openSessionPage();
 }
@@ -2885,6 +2909,7 @@ function endSession() {
   session.active  = false;
   session.endTime = Date.now();
   saveCurrentSession();
+  clearActiveSession();
   applyState();
   showEndScreen();
 }
@@ -2919,12 +2944,32 @@ document.getElementById('floatOtherInput').addEventListener('input', e => {
   session.setup.floatOther = e.target.value;
 });
 
+// ── タックル手動入力 ────────────────────────────
+document.getElementById('tackleManualInput').addEventListener('input', e => {
+  session.setup.tackle = e.target.value;
+});
+
 // ── チップバインド ──────────────────────────────
 bindChips('chipTackle',    'tackle');
 bindChips('chipFloatType', 'floatType');
 bindChips('chipHookType',  'hookType');
 bindChips('chipBait',      'bait');
 bindChips('chipChum',      'chum', true);
+
+// ── ハリ 種類 手動入力 ──────────────────────────
+document.getElementById('hookTypeManualInput').addEventListener('input', e => {
+  session.setup.hookType = e.target.value;
+});
+document.getElementById('chipHookType').querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const inp = document.getElementById('hookTypeManualInput');
+    if (chip.dataset.val === '手動入力') {
+      if (inp) { inp.classList.remove('hidden'); session.setup.hookType = inp.value || ''; inp.focus(); }
+    } else {
+      if (inp) inp.classList.add('hidden');
+    }
+  });
+});
 
 // ── マイページプリセットをセットアップモーダルへ反映 ──
 function applyMyPagePresetsToSetup() {
@@ -2952,14 +2997,21 @@ function applyMyPagePresetsToSetup() {
     // No presets — no-op (section always visible)
   }
 
-  // Bind tackle chips (no longer toggle manual section)
+  // Bind tackle chips
   if (chipTackleEl) {
     chipTackleEl.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         chipTackleEl.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
         chip.classList.add('sel');
         const val = chip.dataset.val;
-        session.setup.tackle = (val === '手動入力') ? '' : val;
+        const inp = document.getElementById('tackleManualInput');
+        if (val === '手動入力') {
+          session.setup.tackle = '';
+          if (inp) { inp.classList.remove('hidden'); inp.focus(); }
+        } else {
+          session.setup.tackle = val;
+          if (inp) inp.classList.add('hidden');
+        }
       });
     });
   }
@@ -3123,8 +3175,8 @@ function openSessionPage() {
       const nowH = now.getHours() + now.getMinutes() / 60;
       try {
         drawGraph(canvas, tideData.dense, SPH, nowH,
-                  tideData.extremes, null, tideData.sunTimes, null);
-      } catch(e) {}
+                  tideData.extremes, [], tideData.sunTimes, null);
+      } catch(e) { console.warn('sessionTideGraph:', e); }
     }
     const info = document.getElementById('sessionTideInfo');
     if (info && tideData.extremes && tideData.extremes.length) {
@@ -3254,6 +3306,8 @@ function openCatchModal() {
   if (lbl) lbl.textContent = '魚種を選択 ▼';
 
   document.querySelectorAll('#fishGrid .fish-chip').forEach(c => c.classList.remove('sel'));
+  const fishOtherInp = document.getElementById('fishOtherInput');
+  if (fishOtherInp) { fishOtherInp.value = ''; fishOtherInp.classList.add('hidden'); }
   document.querySelectorAll('#chipFlowDir .chip, #chipFlowSpeed .chip').forEach(c => c.classList.remove('sel'));
   document.getElementById('btnKeepCatch').classList.remove('sel');
   document.getElementById('btnReleaseCatch').classList.remove('sel');
@@ -3308,6 +3362,7 @@ function saveCatch() {
   session.catches++;
   updateScore();
   renderRecords();
+  saveActiveSession();
   closeCatchModal();
   flashBtn('btnCatch');
 }
@@ -3368,6 +3423,17 @@ document.getElementById('fishGrid').querySelectorAll('.fish-chip').forEach(chip 
     document.getElementById('fishGrid').querySelectorAll('.fish-chip')
       .forEach(c => c.classList.remove('sel'));
     chip.classList.add('sel');
+    const otherInp = document.getElementById('fishOtherInput');
+    if (chip.dataset.val === 'その他（直接入力）') {
+      if (otherInp) { otherInp.classList.remove('hidden'); otherInp.focus(); }
+      catchRec.species = null;
+      const bar = document.getElementById('fishSelectBar');
+      const lbl = document.getElementById('fishSelectLabel');
+      if (bar) bar.classList.remove('sel');
+      if (lbl) lbl.textContent = '魚種を入力 ▼';
+      return;
+    }
+    if (otherInp) otherInp.classList.add('hidden');
     catchRec.species = chip.dataset.val;
     // Update bar label and close sheet
     const bar = document.getElementById('fishSelectBar');
@@ -3376,6 +3442,16 @@ document.getElementById('fishGrid').querySelectorAll('.fish-chip').forEach(chip 
     if (lbl) lbl.textContent = chip.dataset.val;
     closeFishSheet();
   });
+});
+
+// 魚種 直接入力
+document.getElementById('fishOtherInput').addEventListener('input', e => {
+  const val = e.target.value.trim();
+  catchRec.species = val || null;
+  const bar = document.getElementById('fishSelectBar');
+  const lbl = document.getElementById('fishSelectLabel');
+  if (bar) bar.classList.toggle('sel', !!val);
+  if (lbl) lbl.textContent = val ? val + ' ▼' : '魚種を入力 ▼';
 });
 
 // 付け餌シート
@@ -3394,6 +3470,18 @@ document.getElementById('chipBait').querySelectorAll('.chip').forEach(chip => {
 // コマセ手動入力
 document.getElementById('chumManualInput').addEventListener('input', (e) => {
   session.setup.chumMemo = e.target.value;
+});
+
+// コマセ手動入力ボタン
+document.getElementById('btnChumManual').addEventListener('click', () => {
+  const inp = document.getElementById('chumManualInput');
+  const btn = document.getElementById('btnChumManual');
+  if (inp) {
+    const show = inp.classList.contains('hidden');
+    inp.classList.toggle('hidden', !show);
+    if (btn) btn.classList.toggle('sel', show);
+    if (show) inp.focus();
+  }
 });
 
 // キープ / リリース
@@ -3485,6 +3573,7 @@ function saveBarraRecord() {
   });
   session.barras++;
   updateScore();
+  saveActiveSession();
   closeBarraModal();
   flashBtn('btnBarra');
 }
@@ -3703,6 +3792,7 @@ function buildSummary(totalMins, maxSize) {
 }
 
 document.getElementById('btnBackHome').addEventListener('click', () => {
+  clearActiveSession();
   document.getElementById('endScreen').classList.add('hidden');
   session.records     = [];
   session.barraRecords = [];
@@ -3783,6 +3873,7 @@ document.getElementById('btnSendSMS').addEventListener('click', () => {
 // ════════════════════════════════════════════════
 
 const STORAGE_KEY = 'shioroku_trips';
+const ACTIVE_SESSION_KEY = 'shioroku_active';
 
 function loadTrips() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -3820,6 +3911,65 @@ function deleteTrip(id) {
   const trips = loadTrips().filter(t => t.id !== id);
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(trips)); }
   catch(e) {}
+}
+
+// ── 進行中釣行の即時保存・復元 ─────────────────────
+function saveActiveSession() {
+  if (!session.active || !session.startTime) return;
+  try {
+    const data = {
+      active:       true,
+      startTime:    session.startTime,
+      catches:      session.catches,
+      barras:       session.barras,
+      records:      session.records.slice(),
+      barraRecords: session.barraRecords.slice(),
+      tripPhoto:    session.tripPhoto || null,
+      setup: {
+        ...session.setup,
+        chum: [...session.setup.chum],
+      },
+    };
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('saveActiveSession failed:', e); }
+}
+
+function clearActiveSession() {
+  try { localStorage.removeItem(ACTIVE_SESSION_KEY); } catch(e) {}
+}
+
+function restoreActiveSession() {
+  try {
+    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data || !data.active || !data.startTime) return false;
+    session.active       = true;
+    session.startTime    = data.startTime;
+    session.catches      = data.catches  || 0;
+    session.barras       = data.barras   || 0;
+    session.records      = data.records  || [];
+    session.barraRecords = data.barraRecords || [];
+    session.tripPhoto    = data.tripPhoto || null;
+    if (data.setup) {
+      session.setup = { ...session.setup, ...data.setup, chum: new Set(data.setup.chum || []) };
+    }
+    return true;
+  } catch(e) { console.warn('restoreActiveSession failed:', e); return false; }
+}
+
+function showRestoreNotice() {
+  const el = document.createElement('div');
+  el.style.cssText = [
+    'position:fixed;top:env(safe-area-inset-top,0);left:0;right:0',
+    'background:#0e3020;border-bottom:2px solid #27ae60',
+    'color:#4ddd7c;font-size:15px;font-weight:600',
+    'text-align:center;padding:14px 16px;z-index:900',
+    'animation:fadeInUp .3s ease',
+  ].join(';');
+  el.textContent = '🔄 釣行を再開しました';
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 400); }, 3000);
 }
 
 // ── 過去釣行 一覧 ────────────────────────────────
@@ -5166,6 +5316,30 @@ renderMyPage = function() {
   const body = document.getElementById('myPageBody');
   if (body) body.prepend(renderAreaSection());
 };
+
+// ── 進行中釣行の復元（ページ再読み込み対応）──────────
+let _pendingRestoreNotice = false;
+{
+  const wasRestored = restoreActiveSession();
+  if (wasRestored) {
+    _pendingRestoreNotice = true;
+    applyState();
+    updateScore();
+    renderRecords();
+    updateElapsed();
+    session.elapsedTimer = setInterval(updateElapsed, 30000);
+    const _st = session.startTime;
+    const _hh = String(new Date(_st).getHours()).padStart(2, '0');
+    const _mm = String(new Date(_st).getMinutes()).padStart(2, '0');
+    document.getElementById('sessionStartLabel').textContent = `釣行中  開始 ${_hh}:${_mm}`;
+  }
+}
+
+// ── バックグラウンド移行前に必ず保存 ──────────────────
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveActiveSession();
+});
+window.addEventListener('pagehide', saveActiveSession);
 
 updateAreaLabel();
 renderCalendar();
